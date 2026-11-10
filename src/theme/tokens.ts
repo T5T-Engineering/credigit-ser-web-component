@@ -21,8 +21,11 @@ export const colors = {
 } as const;
 
 export const fonts = {
-  sans: '"Archivo", ui-sans-serif, system-ui, sans-serif',
-  mono: '"IBM Plex Mono", ui-monospace, monospace',
+  sans: '"Baloo 2", ui-sans-serif, system-ui, sans-serif',
+  /** Labels and figures use the application font too (with tabular numbers). */
+  mono: '"Baloo 2", ui-sans-serif, system-ui, sans-serif',
+  /** Code samples only. */
+  code: '"IBM Plex Mono", ui-monospace, monospace',
 } as const;
 
 /** Bolt-style t-shirt sizes used by component `size` props. */

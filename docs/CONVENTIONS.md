@@ -11,7 +11,7 @@ This is the single contract for everyone building in or consuming `@credigit/web
 | Component design and design principles | **Bolt** (the ride-hailing company, bolt.eu): shapes, sizes, type scale, elevation, states — see **[BOLT-DESIGN.md](BOLT-DESIGN.md)** (binding). Component taxonomy (group names) and t-shirt size names are kept for API stability. |
 | Product language | `../README.md` (Smart Enterprise Risk 360° PRD) |
 
-Only the font family (and the brand-kit colours and logo) differ from Bolt. Credigit fonts: **Archivo** (headings and text), **IBM Plex Mono** (labels and figures: eyebrows, KPI values, table numbers, codes).
+Only the font family (and the brand-kit colours and logo) differ from Bolt. Application font: **Baloo 2** for everything — headings, text, labels and figures. The `font-mono` utility is kept for labels/figures but now maps to Baloo 2 with tabular numbers; use `font-code` (IBM Plex Mono) only for code samples.
 
 ## 2. Stack
 

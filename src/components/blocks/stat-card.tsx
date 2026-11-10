@@ -8,7 +8,7 @@ import { eyebrowText, iconTileClass, toneStrongText, toneTile, type BlockTone } 
 export type StatCardProps = ComponentProps<"div"> & {
   /** KPI name. */
   label: ReactNode;
-  /** Pre-formatted figure, e.g. "₦4.2bn" or "3.8%". Rendered in IBM Plex Mono. */
+  /** Pre-formatted figure, e.g. "₦4.2bn" or "3.8%". Rendered with tabular figures. */
   value: ReactNode;
   /** Change versus comparison period, e.g. "+12.4%". */
   delta?: string;
