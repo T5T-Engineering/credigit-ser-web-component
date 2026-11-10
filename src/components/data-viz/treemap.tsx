@@ -188,7 +188,9 @@ export function Treemap({
           );
         })}
       </div>
-      <table className="sr-only">
+      {/* Clipped wrapper: an sr-only <table> alone can widen narrow pages. */}
+      <div className="sr-only">
+      <table>
         <caption>{label}</caption>
         <thead>
           <tr>
@@ -207,6 +209,7 @@ export function Treemap({
           ))}
         </tbody>
       </table>
+      </div>
     </figure>
   );
 }

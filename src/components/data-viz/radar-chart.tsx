@@ -313,7 +313,9 @@ export function RadarChart({
         </figcaption>
       )}
 
-      <table className="sr-only">
+      {/* Clipped wrapper: an sr-only <table> alone can widen narrow pages. */}
+      <div className="sr-only">
+      <table>
         <caption>{name}</caption>
         <thead>
           <tr>
@@ -336,6 +338,7 @@ export function RadarChart({
           ))}
         </tbody>
       </table>
+      </div>
     </figure>
   );
 }

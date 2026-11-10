@@ -273,7 +273,9 @@ export function ScatterChart({
           ))}
         </figcaption>
       )}
-      <table className="sr-only">
+      {/* Clipped wrapper: an sr-only <table> alone can widen narrow pages. */}
+      <div className="sr-only">
+      <table>
         <caption>{label}</caption>
         <thead>
           <tr>
@@ -298,6 +300,7 @@ export function ScatterChart({
           )}
         </tbody>
       </table>
+      </div>
     </figure>
   );
 }

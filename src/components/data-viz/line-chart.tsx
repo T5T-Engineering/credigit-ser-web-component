@@ -203,7 +203,9 @@ export function LineChart({
           ))}
         </figcaption>
       )}
-      <table className="sr-only">
+      {/* Clipped wrapper: an sr-only <table> alone can widen narrow pages. */}
+      <div className="sr-only">
+      <table>
         <caption>{label}</caption>
         <thead>
           <tr>
@@ -226,6 +228,7 @@ export function LineChart({
           ))}
         </tbody>
       </table>
+      </div>
     </figure>
   );
 }

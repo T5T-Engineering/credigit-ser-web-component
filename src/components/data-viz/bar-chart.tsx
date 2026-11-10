@@ -38,8 +38,10 @@ export function BarChart({
   const values = showValues ?? orientation === "horizontal";
   const summary = data.map((d) => `${d.label}: ${valueFormatter(d.value)}`).join(", ");
 
+  // Clipped wrapper: an sr-only <table> alone can widen narrow pages.
   const table = (
-    <table className="sr-only">
+      <div className="sr-only">
+      <table>
       <caption>{label}</caption>
       <thead>
         <tr>
@@ -56,6 +58,7 @@ export function BarChart({
         ))}
       </tbody>
     </table>
+      </div>
   );
 
   if (orientation === "horizontal") {

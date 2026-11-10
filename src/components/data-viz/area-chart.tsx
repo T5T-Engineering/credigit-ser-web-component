@@ -155,7 +155,9 @@ export function AreaChart({
           ))}
         </figcaption>
       )}
-      <table className="sr-only">
+      {/* Clipped wrapper: an sr-only <table> alone can widen narrow pages. */}
+      <div className="sr-only">
+      <table>
         <caption>{label}</caption>
         <thead>
           <tr>
@@ -178,6 +180,7 @@ export function AreaChart({
           ))}
         </tbody>
       </table>
+      </div>
     </figure>
   );
 }
