@@ -16,3 +16,5 @@ export * from "./role-picker";
 export * from "./tenant-switcher";
 export * from "./session-timeout-dialog";
 export * from "./permission-gate";
+export * from "./auth-card";
+export * from "./otp-verification";

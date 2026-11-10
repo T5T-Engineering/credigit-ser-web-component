@@ -28,3 +28,5 @@ export { FileUpload, fileMatchesAccept, formatFileSize } from "./file-upload";
 export type { FileRejection, FileUploadProps } from "./file-upload";
 export { Form, FormActions } from "./form";
 export type { FormActionsProps, FormProps } from "./form";
+export * from "./password-input";
+export * from "./password-strength";
