@@ -1,0 +1,375 @@
+/*
+ * Credigit design tokens for Tailwind CSS v4.
+ *
+ * Consumers:
+ *   @import "tailwindcss";
+ *   @import "@credigit/web-ui/styles.css";
+ *   @source "<path to>/node_modules/@credigit/web-ui/src";
+ *
+ * How theming works
+ * - Three brand inputs (--cg-brand-primary / accent / neutral) drive everything.
+ *   BrandProvider rewrites them at runtime; every scale below is derived with color-mix(),
+ *   so one change recolours the whole product.
+ * - Bolt-style surface themes (xlight, light, dark, xdark) remap semantic tokens
+ *   (--cg-bg, --cg-fg, --cg-border ...) for any subtree: <section data-cg-theme="dark">.
+ * - Components must use the semantic utilities (bg-surface, text-fg, border-line, bg-action ...)
+ *   or the brand scales (primary-*, accent-*, neutral-*). Never hard-code hex values.
+ */
+
+/* ---------- Fonts (from the Credigit brand kit) ---------- */
+@font-face { font-family: "Archivo"; src: url("../../assets/fonts/Archivo-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("../../assets/fonts/Archivo-Italic.ttf") format("truetype"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("../../assets/fonts/Archivo-Medium.ttf") format("truetype"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("../../assets/fonts/Archivo-SemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("../../assets/fonts/Archivo-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("../../assets/fonts/Archivo-ExtraBold.ttf") format("truetype"); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("../../assets/fonts/IBMPlexMono-Regular.ttf") format("truetype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("../../assets/fonts/IBMPlexMono-Medium.ttf") format("truetype"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("../../assets/fonts/IBMPlexMono-SemiBold.ttf") format("truetype"); font-weight: 600; font-style: normal; font-display: swap; }
+
+/* ---------- Brand inputs and derived scales ---------- */
+:root {
+  /* Brand kit defaults. BrandProvider overrides these three at runtime. */
+  --cg-brand-primary: #0F1E2E; /* Credigit Ink */
+  --cg-brand-accent: #E8401C;  /* Credigit Ember */
+  --cg-brand-neutral: #5B6878; /* Credigit Slate */
+
+  --cg-primary-50: color-mix(in oklab, var(--cg-brand-primary) 5%, white);
+  --cg-primary-100: color-mix(in oklab, var(--cg-brand-primary) 10%, white);
+  --cg-primary-200: color-mix(in oklab, var(--cg-brand-primary) 22%, white);
+  --cg-primary-300: color-mix(in oklab, var(--cg-brand-primary) 40%, white);
+  --cg-primary-400: color-mix(in oklab, var(--cg-brand-primary) 65%, white);
+  --cg-primary-500: color-mix(in oklab, var(--cg-brand-primary) 85%, white);
+  --cg-primary-600: var(--cg-brand-primary);
+  --cg-primary-700: color-mix(in oklab, var(--cg-brand-primary) 85%, black);
+  --cg-primary-800: color-mix(in oklab, var(--cg-brand-primary) 70%, black);
+  --cg-primary-900: color-mix(in oklab, var(--cg-brand-primary) 55%, black);
+
+  --cg-accent-50: color-mix(in oklab, var(--cg-brand-accent) 6%, white);
+  --cg-accent-100: color-mix(in oklab, var(--cg-brand-accent) 12%, white);
+  --cg-accent-200: color-mix(in oklab, var(--cg-brand-accent) 25%, white);
+  --cg-accent-300: color-mix(in oklab, var(--cg-brand-accent) 45%, white);
+  --cg-accent-400: color-mix(in oklab, var(--cg-brand-accent) 70%, white);
+  --cg-accent-500: var(--cg-brand-accent);
+  --cg-accent-600: color-mix(in oklab, var(--cg-brand-accent) 84%, black); /* ~ brand kit #C2330F */
+  --cg-accent-700: color-mix(in oklab, var(--cg-brand-accent) 70%, black);
+  --cg-accent-800: color-mix(in oklab, var(--cg-brand-accent) 55%, black);
+  --cg-accent-900: color-mix(in oklab, var(--cg-brand-accent) 40%, black);
+
+  --cg-neutral-50: color-mix(in oklab, var(--cg-brand-neutral) 5%, white);
+  --cg-neutral-100: color-mix(in oklab, var(--cg-brand-neutral) 10%, white);
+  --cg-neutral-200: color-mix(in oklab, var(--cg-brand-neutral) 24%, white); /* ~ brand kit line #D5DBE1 */
+  --cg-neutral-300: color-mix(in oklab, var(--cg-brand-neutral) 45%, white); /* ~ brand kit mist #AEB8C4 */
+  --cg-neutral-400: color-mix(in oklab, var(--cg-brand-neutral) 70%, white);
+  --cg-neutral-500: var(--cg-brand-neutral);
+  --cg-neutral-600: color-mix(in oklab, var(--cg-brand-neutral) 85%, black);
+  --cg-neutral-700: color-mix(in oklab, var(--cg-brand-neutral) 70%, black);
+  --cg-neutral-800: color-mix(in oklab, var(--cg-brand-neutral) 55%, black);
+  --cg-neutral-900: color-mix(in oklab, var(--cg-brand-neutral) 40%, black);
+
+  /* Status colours. Not defined in the brand kit: provisional values, pending brand-owner approval. */
+  --cg-success: #1E8E5A;
+  --cg-warning: #B7791F;
+  --cg-danger: #C8233B;
+  --cg-info: #2563EB;
+  --cg-success-soft: color-mix(in oklab, var(--cg-success) 12%, white);
+  --cg-warning-soft: color-mix(in oklab, var(--cg-warning) 14%, white);
+  --cg-danger-soft: color-mix(in oklab, var(--cg-danger) 12%, white);
+  --cg-info-soft: color-mix(in oklab, var(--cg-info) 12%, white);
+  /* Strong variants: AA text on white/soft backgrounds and solid fills with white text. */
+  --cg-success-strong: color-mix(in oklab, var(--cg-success) 75%, black);
+  --cg-warning-strong: color-mix(in oklab, var(--cg-warning) 62%, black);
+  --cg-danger-strong: color-mix(in oklab, var(--cg-danger) 82%, black);
+  --cg-info-strong: color-mix(in oklab, var(--cg-info) 80%, black);
+  --cg-on-status: #FFFFFF;
+  --cg-overlay: color-mix(in oklab, var(--cg-primary-900) 55%, transparent);
+
+  /* Bolt information density: compact | regular | spacious. Controls sizing of inputs, buttons, table rows. */
+  --cg-control-h-sm: 2rem;
+  --cg-control-h-md: 2.5rem;
+  --cg-control-h-lg: 3rem;
+  --cg-cell-py: 0.75rem;
+}
+
+/* ---------- Surface themes (Bolt: xlight, light, dark, xdark) ---------- */
+:root,
+[data-cg-theme="xlight"] {
+  --cg-bg: #FFFFFF;
+  --cg-surface: #FFFFFF;
+  --cg-surface-sunken: var(--cg-neutral-50);
+  --cg-fg: var(--cg-brand-primary);
+  --cg-fg-muted: var(--cg-brand-neutral);
+  --cg-fg-subtle: var(--cg-neutral-400);
+  --cg-border: var(--cg-neutral-200);
+  --cg-border-strong: var(--cg-neutral-300);
+  --cg-action: var(--cg-accent-600); /* deeper Ember (~#C2330F): white text passes AA 4.5:1 */
+  --cg-action-hover: var(--cg-accent-700);
+  --cg-on-action: #FFFFFF;
+  --cg-emphasis: var(--cg-brand-primary);
+  --cg-emphasis-hover: var(--cg-primary-500);
+  --cg-on-emphasis: #FFFFFF;
+  --cg-link: var(--cg-accent-600);
+  --cg-accent-tint: var(--cg-accent-50);
+  --cg-accent-text: var(--cg-accent-600);
+  --cg-focus: var(--cg-accent-500);
+  --cg-logo-ink: var(--cg-brand-primary);
+  --cg-logo-accent: var(--cg-brand-accent);
+  --cg-logo-descriptor: var(--cg-brand-neutral);
+  --cg-logo-default-display: inline-block;
+  --cg-logo-reverse-display: none;
+  color-scheme: light;
+}
+
+[data-cg-theme="light"] {
+  --cg-bg: var(--cg-neutral-50);
+  --cg-surface: #FFFFFF;
+  --cg-surface-sunken: var(--cg-neutral-100);
+  --cg-fg: var(--cg-brand-primary);
+  --cg-fg-muted: var(--cg-brand-neutral);
+  --cg-fg-subtle: var(--cg-neutral-400);
+  --cg-border: var(--cg-neutral-200);
+  --cg-border-strong: var(--cg-neutral-300);
+  --cg-action: var(--cg-accent-600); /* deeper Ember (~#C2330F): white text passes AA 4.5:1 */
+  --cg-action-hover: var(--cg-accent-700);
+  --cg-on-action: #FFFFFF;
+  --cg-emphasis: var(--cg-brand-primary);
+  --cg-emphasis-hover: var(--cg-primary-500);
+  --cg-on-emphasis: #FFFFFF;
+  --cg-link: var(--cg-accent-600);
+  --cg-accent-tint: var(--cg-accent-50);
+  --cg-accent-text: var(--cg-accent-600);
+  --cg-focus: var(--cg-accent-500);
+  --cg-logo-ink: var(--cg-brand-primary);
+  --cg-logo-accent: var(--cg-brand-accent);
+  --cg-logo-descriptor: var(--cg-brand-neutral);
+  --cg-logo-default-display: inline-block;
+  --cg-logo-reverse-display: none;
+  color-scheme: light;
+}
+
+[data-cg-theme="dark"] {
+  --cg-bg: var(--cg-brand-primary);
+  --cg-surface: color-mix(in oklab, var(--cg-brand-primary) 90%, white);
+  --cg-surface-sunken: var(--cg-primary-700);
+  --cg-fg: #FFFFFF;
+  --cg-fg-muted: var(--cg-neutral-200);
+  --cg-fg-subtle: var(--cg-neutral-300);
+  --cg-border: color-mix(in oklab, white 14%, transparent);
+  --cg-border-strong: color-mix(in oklab, white 28%, transparent);
+  --cg-action: var(--cg-accent-600); /* deeper Ember (~#C2330F): white text passes AA 4.5:1 */
+  --cg-action-hover: var(--cg-accent-700);
+  --cg-on-action: #FFFFFF;
+  --cg-emphasis: #FFFFFF;
+  --cg-emphasis-hover: var(--cg-neutral-100);
+  --cg-on-emphasis: var(--cg-brand-primary);
+  --cg-link: var(--cg-accent-300);
+  --cg-accent-tint: color-mix(in oklab, var(--cg-brand-accent) 18%, var(--cg-surface));
+  --cg-accent-text: var(--cg-accent-300);
+  --cg-focus: var(--cg-accent-400);
+  --cg-logo-ink: #FFFFFF;
+  --cg-logo-accent: var(--cg-brand-accent);
+  --cg-logo-descriptor: var(--cg-neutral-300);
+  --cg-logo-default-display: none;
+  --cg-logo-reverse-display: inline-block;
+  color-scheme: dark;
+}
+
+[data-cg-theme="xdark"] {
+  --cg-bg: var(--cg-primary-800);
+  --cg-surface: var(--cg-brand-primary);
+  --cg-surface-sunken: var(--cg-primary-900);
+  --cg-fg: #FFFFFF;
+  --cg-fg-muted: var(--cg-neutral-200);
+  --cg-fg-subtle: var(--cg-neutral-300);
+  --cg-border: color-mix(in oklab, white 12%, transparent);
+  --cg-border-strong: color-mix(in oklab, white 24%, transparent);
+  --cg-action: var(--cg-accent-600); /* deeper Ember (~#C2330F): white text passes AA 4.5:1 */
+  --cg-action-hover: var(--cg-accent-700);
+  --cg-on-action: #FFFFFF;
+  --cg-emphasis: #FFFFFF;
+  --cg-emphasis-hover: var(--cg-neutral-100);
+  --cg-on-emphasis: var(--cg-brand-primary);
+  --cg-link: var(--cg-accent-300);
+  --cg-accent-tint: color-mix(in oklab, var(--cg-brand-accent) 18%, var(--cg-surface));
+  --cg-accent-text: var(--cg-accent-300);
+  --cg-focus: var(--cg-accent-400);
+  --cg-logo-ink: #FFFFFF;
+  --cg-logo-accent: var(--cg-brand-accent);
+  --cg-logo-descriptor: var(--cg-neutral-300);
+  --cg-logo-default-display: none;
+  --cg-logo-reverse-display: inline-block;
+  color-scheme: dark;
+}
+
+[data-cg-density="compact"] {
+  --cg-control-h-sm: 1.75rem;
+  --cg-control-h-md: 2.125rem;
+  --cg-control-h-lg: 2.5rem;
+  --cg-cell-py: 0.5rem;
+}
+
+[data-cg-density="spacious"] {
+  --cg-control-h-sm: 2.25rem;
+  --cg-control-h-md: 2.75rem;
+  --cg-control-h-lg: 3.5rem;
+  --cg-cell-py: 1rem;
+}
+
+/* ---------- Tailwind theme mapping ---------- */
+@theme inline {
+  --font-sans: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Brand scales: bg-primary-600, text-accent-500, border-neutral-200 ... */
+  --color-primary: var(--cg-brand-primary);
+  --color-primary-50: var(--cg-primary-50);
+  --color-primary-100: var(--cg-primary-100);
+  --color-primary-200: var(--cg-primary-200);
+  --color-primary-300: var(--cg-primary-300);
+  --color-primary-400: var(--cg-primary-400);
+  --color-primary-500: var(--cg-primary-500);
+  --color-primary-600: var(--cg-primary-600);
+  --color-primary-700: var(--cg-primary-700);
+  --color-primary-800: var(--cg-primary-800);
+  --color-primary-900: var(--cg-primary-900);
+
+  --color-accent: var(--cg-brand-accent);
+  --color-accent-50: var(--cg-accent-50);
+  --color-accent-100: var(--cg-accent-100);
+  --color-accent-200: var(--cg-accent-200);
+  --color-accent-300: var(--cg-accent-300);
+  --color-accent-400: var(--cg-accent-400);
+  --color-accent-500: var(--cg-accent-500);
+  --color-accent-600: var(--cg-accent-600);
+  --color-accent-700: var(--cg-accent-700);
+  --color-accent-800: var(--cg-accent-800);
+  --color-accent-900: var(--cg-accent-900);
+
+  --color-neutral: var(--cg-brand-neutral);
+  --color-neutral-50: var(--cg-neutral-50);
+  --color-neutral-100: var(--cg-neutral-100);
+  --color-neutral-200: var(--cg-neutral-200);
+  --color-neutral-300: var(--cg-neutral-300);
+  --color-neutral-400: var(--cg-neutral-400);
+  --color-neutral-500: var(--cg-neutral-500);
+  --color-neutral-600: var(--cg-neutral-600);
+  --color-neutral-700: var(--cg-neutral-700);
+  --color-neutral-800: var(--cg-neutral-800);
+  --color-neutral-900: var(--cg-neutral-900);
+
+  /* Semantic, theme-aware: bg-bg, bg-surface, text-fg, text-fg-muted, border-line, bg-action ... */
+  --color-bg: var(--cg-bg);
+  --color-surface: var(--cg-surface);
+  --color-surface-sunken: var(--cg-surface-sunken);
+  --color-fg: var(--cg-fg);
+  --color-fg-muted: var(--cg-fg-muted);
+  --color-fg-subtle: var(--cg-fg-subtle);
+  --color-line: var(--cg-border);
+  --color-line-strong: var(--cg-border-strong);
+  --color-action: var(--cg-action);
+  --color-action-hover: var(--cg-action-hover);
+  --color-on-action: var(--cg-on-action);
+  --color-emphasis: var(--cg-emphasis);
+  --color-emphasis-hover: var(--cg-emphasis-hover);
+  --color-on-emphasis: var(--cg-on-emphasis);
+  --color-link: var(--cg-link);
+  /* Theme-aware accent tint (icon tiles, selected rows, soft badges) and accent text (eyebrows, labels). */
+  --color-accent-tint: var(--cg-accent-tint);
+  --color-accent-text: var(--cg-accent-text);
+  --color-focus: var(--cg-focus);
+
+  --color-success: var(--cg-success);
+  --color-success-soft: var(--cg-success-soft);
+  --color-warning: var(--cg-warning);
+  --color-warning-soft: var(--cg-warning-soft);
+  --color-danger: var(--cg-danger);
+  --color-danger-soft: var(--cg-danger-soft);
+  --color-info: var(--cg-info);
+  --color-info-soft: var(--cg-info-soft);
+  --color-success-strong: var(--cg-success-strong);
+  --color-warning-strong: var(--cg-warning-strong);
+  --color-danger-strong: var(--cg-danger-strong);
+  --color-info-strong: var(--cg-info-strong);
+  --color-on-status: var(--cg-on-status);
+  --color-overlay: var(--cg-overlay);
+
+  /* Bolt geometry: pills for controls, large squircle corners for surfaces (see docs/BOLT-DESIGN.md). */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 14px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
+  --radius-5xl: 40px;
+
+  /* Bolt elevation: hairline ring + soft drop. */
+  --shadow-sm: 0 0 0 1px color-mix(in oklab, var(--cg-brand-primary) 6%, transparent), 0 1px 2px 0 color-mix(in oklab, var(--cg-brand-primary) 6%, transparent);
+  --shadow-md: 0 0 0 1px color-mix(in oklab, var(--cg-brand-primary) 6%, transparent), 0 4px 16px 0 color-mix(in oklab, var(--cg-brand-primary) 10%, transparent);
+  --shadow-lg: 0 0 0 1px color-mix(in oklab, var(--cg-brand-primary) 6%, transparent), 0 12px 40px -8px color-mix(in oklab, var(--cg-brand-primary) 22%, transparent);
+
+  /* Bolt type scale (Archivo). */
+  --text-display: 4.5rem;
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.025em;
+  --text-headline: 3rem;
+  --text-headline--line-height: 1.1;
+  --text-headline--letter-spacing: -0.02em;
+  --text-title: 1.875rem;
+  --text-title--line-height: 1.2;
+  --text-title--letter-spacing: -0.015em;
+  --text-subtitle: 1.25rem;
+  --text-subtitle--line-height: 1.4;
+  --text-subtitle--letter-spacing: -0.01em;
+  --text-lead: 1.25rem;
+  --text-lead--line-height: 1.55;
+
+  --ease-bolt: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Control heights follow information density: h-control-sm / h-control-md / h-control-lg */
+  --spacing-control-sm: var(--cg-control-h-sm);
+  --spacing-control-md: var(--cg-control-h-md);
+  --spacing-control-lg: var(--cg-control-h-lg);
+  --spacing-cell-y: var(--cg-cell-py);
+}
+
+/* Bolt-style squircle corners where the browser supports corner-shape. */
+@utility squircle {
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+  }
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--cg-bg);
+    color: var(--cg-fg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  [data-cg-theme] {
+    background-color: var(--cg-bg);
+    color: var(--cg-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--cg-focus);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
