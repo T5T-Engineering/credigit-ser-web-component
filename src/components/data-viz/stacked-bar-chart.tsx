@@ -75,8 +75,10 @@ export function StackedBarChart({
     </figcaption>
   ) : null;
 
+  // Clipped wrapper: an sr-only <table> alone can widen narrow pages.
   const table = (
-    <table className="sr-only">
+      <div className="sr-only">
+      <table>
       <caption>{label}</caption>
       <thead>
         <tr>
@@ -101,6 +103,7 @@ export function StackedBarChart({
         ))}
       </tbody>
     </table>
+      </div>
   );
 
   if (orientation === "horizontal") {

@@ -10,6 +10,9 @@ import { toneStyles, type Tone } from "../basic/tone";
 import { Menu, type MenuItem } from "../navigation/menu";
 
 /** A board column (stage). */
+/** Column ids may contain spaces; DOM ids used for aria-labelledby must not. */
+const domSafeId = (id: string) => id.replace(/[^A-Za-z0-9_-]+/g, "-");
+
 export type KanbanColumn = {
   id: string;
   title: string;
@@ -106,7 +109,7 @@ export function KanbanBoard({
             <section
               key={column.id}
               role="listitem"
-              aria-labelledby={`kanban-col-${column.id}`}
+              aria-labelledby={`kanban-col-${domSafeId(column.id)}`}
               data-column-id={column.id}
               className={cx(
                 "squircle flex w-72 shrink-0 snap-start flex-col gap-3 rounded-3xl bg-surface-sunken p-3 transition-shadow duration-150 ease-bolt",
@@ -144,7 +147,7 @@ export function KanbanBoard({
               }
             >
               <header className="flex items-center justify-between gap-2 px-2 pt-1">
-                <h3 id={`kanban-col-${column.id}`} className="m-0 flex min-w-0 items-center gap-2 text-base font-bold text-fg">
+                <h3 id={`kanban-col-${domSafeId(column.id)}`} className="m-0 flex min-w-0 items-center gap-2 text-base font-bold text-fg">
                   {column.tone ? <span aria-hidden="true" className={cx("size-2.5 shrink-0 rounded-full", toneStyles[column.tone].dot)} /> : null}
                   <span className="truncate">{column.title}</span>
                 </h3>
