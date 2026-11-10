@@ -91,12 +91,12 @@ export function AppShell({
   };
 
   return (
-    <div className={cx("min-h-screen bg-bg text-fg", className)} {...props}>
+    <div className={cx("min-h-screen bg-bg text-fg print:min-h-0 print:bg-transparent", className)} {...props}>
       <div
         aria-hidden="true"
         onClick={() => close()}
         className={cx(
-          "fixed inset-0 z-40 bg-overlay transition-opacity duration-200 ease-bolt lg:hidden",
+          "fixed inset-0 z-40 bg-overlay transition-opacity duration-200 ease-bolt lg:hidden print:hidden",
           drawerOpen ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       />
@@ -109,7 +109,7 @@ export function AppShell({
         inert={!desktop && !open ? true : undefined}
         onClick={onDrawerClick}
         className={cx(
-          "fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-bolt lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-bolt lg:translate-x-0 print:hidden",
           sidebarCollapsed ? "w-64 lg:w-16" : "w-64",
           drawerOpen ? "translate-x-0 shadow-lg" : "-translate-x-full",
         )}
@@ -127,8 +127,8 @@ export function AppShell({
         <div className="h-full">{sidebar}</div>
       </div>
 
-      <div className={cx("flex min-h-screen flex-col", sidebarCollapsed ? "lg:pl-16" : "lg:pl-64")}>
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line/60 bg-surface/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+      <div className={cx("flex min-h-screen flex-col print:block print:min-h-0 print:pl-0!", sidebarCollapsed ? "lg:pl-16" : "lg:pl-64")}>
+        <header className="sticky top-0 z-30 print:hidden flex h-16 items-center gap-3 border-b border-line/60 bg-surface/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
           <button
             ref={buttonRef}
             type="button"
@@ -142,7 +142,7 @@ export function AppShell({
           </button>
           <div className="flex min-w-0 flex-1 items-center gap-3">{topbar}</div>
         </header>
-        <main id={mainId} tabIndex={-1} className="min-w-0 flex-1 focus:outline-none">
+        <main id={mainId} tabIndex={-1} className="min-w-0 flex-1 focus:outline-none print:m-0 print:p-0">
           {children}
         </main>
       </div>

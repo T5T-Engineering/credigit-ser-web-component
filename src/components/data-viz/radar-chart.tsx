@@ -30,7 +30,15 @@ export type RadarChartProps = Omit<ComponentProps<"figure">, "children"> & {
   /** Accessible name. Defaults to a summary of series and axes. */
   label?: string;
   valueFormatter?: (value: number) => string;
+  /**
+   * Axis-label scale. The radar scales with its container, so at card width the default labels get small:
+   * `"medium"` (1.3×) and `"large"` (1.6×) enlarge the axis labels (and slightly the ring/value labels) and widen the
+   * label margins to fit. Default `"small"` (the original size).
+   */
+  labelSize?: "small" | "medium" | "large";
 };
+
+const labelScale: Record<NonNullable<RadarChartProps["labelSize"]>, number> = { small: 1, medium: 1.3, large: 1.6 };
 
 const toneColor: Record<RadarTone, string> = {
   accent: "var(--cg-accent-500)",
@@ -91,20 +99,22 @@ export function RadarChart({
   showLevelLabels = true,
   label,
   valueFormatter = defaultFormatter,
+  labelSize = "small",
   className,
   ...props
 }: RadarChartProps) {
   const uid = svgId(useId());
   const count = axes.length;
   const radius = size / 2;
-  const padX = size * 0.36;
-  const padY = size * 0.15;
+  const scale = labelScale[labelSize] ?? 1;
+  const padX = size * 0.36 * scale;
+  const padY = size * 0.15 * scale;
   const width = size + padX * 2;
   const height = size + padY * 2;
   const centerX = padX + radius;
   const centerY = padY + radius;
-  const fontSize = round(size * 0.042);
-  const smallSize = round(size * 0.032);
+  const fontSize = round(size * 0.042 * scale);
+  const smallSize = round(size * 0.032 * Math.sqrt(scale));
 
   const name =
     label ??
@@ -207,7 +217,7 @@ export function RadarChart({
               const cos = Math.cos(angle);
               const sin = Math.sin(angle);
               // Top labels sit closer to the ring so two-line labels stay inside the viewBox.
-              const offset = sin < -0.5 ? size * 0.05 : size * 0.075;
+              const offset = (sin < -0.5 ? size * 0.05 : size * 0.075) * Math.sqrt(scale);
               const x = round(centerX + (radius + offset) * cos);
               const y = round(centerY + (radius + offset) * sin);
               const anchor = cos > 0.25 ? "start" : cos < -0.25 ? "end" : "middle";

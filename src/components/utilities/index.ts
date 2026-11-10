@@ -9,3 +9,4 @@ export * from "./skip-link";
 export * from "./sticky";
 export * from "./scroll-to-top";
 export * from "./brand-settings-panel";
+export * from "./brand-preset-picker";

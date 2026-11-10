@@ -15,6 +15,7 @@ import {
   type BrandLogos,
 } from "../../brand";
 import { cx } from "../../utils/cx";
+import { BrandPresetPicker, type BrandPreset } from "./brand-preset-picker";
 
 /** Maximum logo upload size in bytes (512 KB). */
 export const LOGO_MAX_BYTES = 512 * 1024;
@@ -101,6 +102,8 @@ const fontStack = (family: string) => `"${family}", "Baloo 2", ui-sans-serif, sa
 export type BrandSettingsPanelProps = Omit<ComponentProps<"section">, "title"> & {
   title?: ReactNode;
   description?: ReactNode;
+  /** Ready-made brand themes shown as selectable cards at the top (applied with `updateBrand`). */
+  presets?: BrandPreset[];
 };
 
 /**
@@ -110,6 +113,7 @@ export type BrandSettingsPanelProps = Omit<ComponentProps<"section">, "title"> &
 export function BrandSettingsPanel({
   title = "Brand settings",
   description = "Change colours, name, logos and font. Changes apply across the whole product immediately.",
+  presets,
   className,
   ...props
 }: BrandSettingsPanelProps) {
@@ -210,7 +214,19 @@ export function BrandSettingsPanel({
       </header>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="flex flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-8">
+          {/* Presets */}
+          {presets && presets.length > 0 && (
+            <BrandPresetPicker
+              presets={presets}
+              heading={<p className={eyebrow}>Presets</p>}
+              onApply={() => {
+                setLogoErrors({});
+                setCustomFontError(null);
+              }}
+            />
+          )}
+
           {/* Name */}
           <div className="flex flex-col gap-1.5">
             <label htmlFor={`${uid}-name`} className="text-sm font-semibold text-fg">

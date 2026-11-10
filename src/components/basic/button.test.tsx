@@ -107,3 +107,28 @@ describe("IconButton", () => {
     expect(button.className).toContain("size-control-md");
   });
 });
+
+describe("Button wrap", () => {
+  it("is a single-line pill by default", () => {
+    render(<Button>Go</Button>);
+    const cls = screen.getByRole("button").className;
+    expect(cls).toContain("whitespace-nowrap");
+    expect(cls).toContain("rounded-full");
+    expect(cls).toContain("h-control-md");
+  });
+
+  it("wraps onto several lines with auto height and squircle corners", () => {
+    render(
+      <Button wrap variant="tertiary" size="small">
+        Which obligors breached the single-obligor limit this quarter?
+      </Button>,
+    );
+    const cls = screen.getByRole("button").className;
+    expect(cls).toContain("whitespace-normal");
+    expect(cls).toContain("rounded-3xl");
+    expect(cls).toContain("min-h-control-sm");
+    expect(cls).not.toContain("rounded-full");
+    expect(cls).not.toMatch(/(^| )h-control-sm/);
+    expect(buttonStyles({ wrap: true, iconOnly: true })).toContain("rounded-full");
+  });
+});

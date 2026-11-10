@@ -45,7 +45,7 @@ export function checklistSummary(items: ChecklistItem[]) {
 }
 
 /** Props for `ChecklistPanel`. */
-export type ChecklistPanelProps = Omit<ComponentProps<"section">, "title"> & {
+export type ChecklistPanelProps = Omit<ComponentProps<"section">, "title" | "onToggle"> & {
   items: ChecklistItem[];
   title?: ReactNode;
   description?: ReactNode;

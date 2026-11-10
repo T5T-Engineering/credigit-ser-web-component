@@ -78,9 +78,33 @@ export function Card({
   );
 }
 
+/** Props for `CardHeader`. */
+export type CardHeaderProps = ComponentProps<"div"> & {
+  /**
+   * `"row"` (default): children sit side by side (title block + trailing action).
+   * `"stack"`: children (title, description …) stack vertically on the left and `actions` sit on the right.
+   */
+  layout?: "row" | "stack";
+  /** Trailing actions (buttons, menu, badge), aligned to the top right. */
+  actions?: ReactNode;
+};
+
 /** Top row of a card: title block plus optional trailing action. */
-export function CardHeader({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cx("flex items-start justify-between gap-4", className)} {...props} />;
+export function CardHeader({ layout = "row", actions, className, children, ...props }: CardHeaderProps) {
+  if (layout === "stack") {
+    return (
+      <div data-layout="stack" className={cx("flex items-start justify-between gap-4", className)} {...props}>
+        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+        {actions != null && actions !== false ? <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">{actions}</div> : null}
+      </div>
+    );
+  }
+  return (
+    <div className={cx("flex items-start justify-between gap-4", className)} {...props}>
+      {children}
+      {actions != null && actions !== false ? <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">{actions}</div> : null}
+    </div>
+  );
 }
 
 /** Props for `CardTitle`. */

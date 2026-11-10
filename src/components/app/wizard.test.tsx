@@ -61,3 +61,30 @@ describe("Wizard", () => {
     expect(screen.getByText("Borrower fields")).toBeInTheDocument();
   });
 });
+
+describe("Wizard stepper layout", () => {
+  const many: WizardStep[] = Array.from({ length: 8 }, (_, i) => ({ id: `s${i}`, title: `Step title ${i + 1}`, content: <p>Body {i + 1}</p> }));
+
+  it("forces compact pills: number-only except the current step", () => {
+    render(<Wizard steps={many} stepperLayout="compact" onSubmit={() => {}} />);
+    const list = screen.getByRole("list");
+    expect(list).toHaveAttribute("data-layout", "compact");
+    // Other titles stay available to screen readers and as tooltips.
+    expect(screen.getByText("Step title 2").className).toContain("sr-only");
+    expect(screen.getByText("Step title 1", { selector: "span.truncate" })).toBeInTheDocument();
+  });
+
+  it("switches to compact automatically when the full stepper overflows", () => {
+    const sw = vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(1600);
+    const cw = vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(1200);
+    render(<Wizard steps={many} onSubmit={() => {}} />);
+    expect(screen.getByRole("list")).toHaveAttribute("data-layout", "compact");
+    sw.mockRestore();
+    cw.mockRestore();
+  });
+
+  it("stays full when the steps fit (and in jsdom by default)", () => {
+    render(<Wizard steps={many} onSubmit={() => {}} />);
+    expect(screen.getByRole("list")).toHaveAttribute("data-layout", "full");
+  });
+});
