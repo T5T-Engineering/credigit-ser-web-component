@@ -82,6 +82,8 @@ All controls: controlled or uncontrolled, `size?: "small"|"medium"|"large"`, `in
 - `SearchField` — search input with icon and optional clear button.
 - `FileUpload` — drag & drop zone, `accept?`, `multiple?`, `maxSizeMb?`, `onFilesChange(files)`; lists selected files.
 - `Form` — `<form>` with vertical stack spacing; `FormActions` — right-aligned button row.
+- `PasswordInput` — `Input` with a show/hide toggle (`showLabel`, `hideLabel`); defaults `autoComplete="current-password"` (use `new-password` for sign-up/reset).
+- `PasswordStrength` — strength meter + rules checklist for a new password: `value`, `rules?: PasswordRule[]` (default `defaultPasswordRules`: 12+ chars, upper, lower, number, symbol — password policy is a tenant setting), `hideRules?`. Helper `evaluatePassword(value, rules)` → `{ valid, passed, failed, score 0–4 }`.
 
 ### layouts (`src/components/layouts`)
 - `Container` — `size?: "small" | "medium" | "large" | "xlarge" | "full"` (max widths 640/896/1200/1440/none), horizontal gutters `px-4 sm:px-6 lg:px-8`.
@@ -216,3 +218,8 @@ import { BrandProvider, brandBootScript } from "@credigit/web-ui";
   <body><BrandProvider>{children}</BrandProvider></body>
 </html>
 ```
+
+### app — authentication screens
+- `AuthCard` — frame for registration, forgot password, one-time code, reset and change-password screens: `logo?`, `icon?`, `title`, `description?`, `back?: { label, href }`, `footer?`, `linkComponent?`, `size?: "small" | "medium"`; form goes in `children`.
+- `OtpVerification` — inline one-time-code entry: `destination?` (masked email), `length?` (6), `onVerify(code) => Promise<boolean>|boolean`, `onResend?`, `resendCooldown?` (30 s), `errorMessage?`, `hint?`, `submitLabel?`, `autoSubmit?`.
+- `RolePicker` additions — `collapsible?` makes each group a disclosure (header shows role count; searching opens matching groups) and `defaultExpandedGroups?: string[]`.
