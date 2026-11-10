@@ -79,3 +79,15 @@ describe("StepUpAuthDialog", () => {
     expect(await screen.findByText("A new code has been sent.")).toBeInTheDocument();
   });
 });
+
+describe("StepUpAuthDialog callback order", () => {
+  it("calls onVerified before onOpenChange(false)", async () => {
+    const user = userEvent.setup();
+    const calls: string[] = [];
+    render(<StepUpAuthDialog open onOpenChange={(o) => calls.push(`open:${o}`)} onVerify={async () => true} onVerified={() => calls.push("verified")} resendCooldown={0} />);
+    await user.click(screen.getAllByRole("textbox")[0]!);
+    await user.keyboard("123456");
+    await waitFor(() => expect(calls).toContain("verified"));
+    expect(calls.indexOf("verified")).toBeLessThan(calls.indexOf("open:false"));
+  });
+});
