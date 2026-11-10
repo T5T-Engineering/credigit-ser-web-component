@@ -19,7 +19,7 @@ export type InfoSectionProps = Omit<ComponentProps<"dl">, "title"> & {
   items: InfoSectionItem[];
   /** Columns at wide breakpoints. Default 2. */
   columns?: 1 | 2 | 3 | 4;
-  /** Render values in IBM Plex Mono (figures, IDs, codes). */
+  /** Render values as tabular figures (figures, IDs, codes). */
   monoValues?: boolean;
 };
 

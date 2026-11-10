@@ -27,7 +27,7 @@ export function CodeSnippet({ code, language, copyable = true, label, className,
       <pre
         tabIndex={0}
         aria-label={label ?? (language ? `${language} code` : "Code")}
-        className="squircle m-0 overflow-x-auto rounded-2xl p-4 font-mono text-sm leading-relaxed text-fg focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+        className="squircle m-0 overflow-x-auto rounded-2xl p-4 font-code text-sm leading-relaxed text-fg focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
       >
         <code>{code}</code>
       </pre>

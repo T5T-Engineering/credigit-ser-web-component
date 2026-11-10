@@ -5,7 +5,7 @@ company, bolt.eu). Only three things differ from Bolt:
 
 | | Bolt | Credigit |
 |---|---|---|
-| Font | Bolt's own sans | **Archivo** (headings, text), **IBM Plex Mono** (labels, figures) |
+| Font | Bolt's own sans | **Baloo 2** for the entire application: headings, text, labels and figures (tabular numbers). IBM Plex Mono only for code samples (`font-code`) |
 | Colours | Bolt green + black | **Credigit brand kit**: Ink `#0F1E2E` in Bolt's black / high-contrast role, Ember `#E8401C` (deep shade `#C2330F` for buttons) in Bolt's green / accent role, Slate `#5B6878` in Bolt's grey role |
 | Logo | Bolt | Credigit `<Logo />` |
 
@@ -48,7 +48,7 @@ in browsers that support it, like Bolt; others fall back to normal rounding).
 | Button small | 32px, 12px padding, 14px text | `size="small"` |
 | Input | 40px, 16px text, 12px padding | `h-control-md` |
 
-## Type (Archivo)
+## Type (Baloo 2)
 
 | Role | Bolt size / line-height | Weight | Tracking |
 |---|---|---|---|
@@ -60,7 +60,7 @@ in browsers that support it, like Bolt; others fall back to normal rounding).
 | Body | 16px / 1.5 | 400 | 0 |
 | Small | 14px / 1.45 | 400–500 | 0 |
 | Button text | 16–18px | 600 | -0.005em |
-| Eyebrow / label (IBM Plex Mono) | 12–13px | 500 | 0.08em, uppercase |
+| Eyebrow / label (Baloo 2, `font-mono` token) | 12–13px | 500 | 0.08em, uppercase |
 
 Headings are `text-fg`; body is `text-fg-muted`. Mobile scales display down to 40–44px, headline to 32px.
 

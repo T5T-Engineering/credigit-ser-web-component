@@ -3,7 +3,7 @@
 Credigit's shared design system for **Smart Enterprise Risk 360°**: brand tokens, runtime theming and the
 reusable React components used by `credigit-ser-landing` and `credigit-ser-frontend`.
 
-- **Brand:** colours, fonts (Archivo, IBM Plex Mono) and logos come from the Credigit brand kit.
+- **Brand:** colours and logos come from the Credigit brand kit. The application font is **Baloo 2** everywhere (IBM Plex Mono only for code samples).
 - **Design principles:** component design follows **Bolt** (the ride-hailing app, bolt.eu): pill controls,
   large squircle surfaces, bold type, soft elevation. Only the font family, colours and logo differ.
   See [`docs/BOLT-DESIGN.md`](docs/BOLT-DESIGN.md).
