@@ -92,3 +92,25 @@ describe("Drawer", () => {
     expect(trigger).toHaveFocus();
   });
 });
+
+describe("nested dialogs", () => {
+  it("closing a dialog inside a Drawer does not close the Drawer", async () => {
+    const { render, screen, fireEvent } = await import("@testing-library/react");
+    const { Drawer } = await import("./drawer");
+    const { Modal } = await import("./modal");
+    const drawerChange = vi.fn();
+    const modalChange = vi.fn();
+    render(
+      <Drawer open title="Workspace" onOpenChange={drawerChange}>
+        <Modal open title="Confirm" onOpenChange={modalChange}>
+          Inner
+        </Modal>
+      </Drawer>,
+    );
+    const dialogs = screen.getAllByRole("dialog", { hidden: true });
+    const inner = dialogs.find((d) => d.textContent?.includes("Inner") && !d.textContent?.includes("Workspace"))!;
+    fireEvent(inner, new Event("close", { bubbles: true }));
+    fireEvent(inner, new Event("cancel", { bubbles: true, cancelable: true }));
+    expect(drawerChange).not.toHaveBeenCalled();
+  });
+});
