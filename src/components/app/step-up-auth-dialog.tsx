@@ -136,6 +136,7 @@ export type StepUpAuthDialogProps = {
   /** Verify the code; resolve `true` on success (dialog closes), `false` to show the error. */
   onVerify: (code: string) => Promise<boolean>;
   /** Called after a successful verification. */
+  /** Called after a successful verification, before the dialog closes (so callers can resolve pending work). */
   onVerified?: () => void;
   /** Resend the OTP; the resend button is hidden when absent or for `pin`. */
   onResend?: () => void | Promise<void>;
@@ -199,8 +200,8 @@ export function StepUpAuthDialog({
     try {
       const ok = await onVerify(value);
       if (ok) {
-        onOpenChange(false);
         onVerified?.();
+        onOpenChange(false);
       } else {
         setError(true);
         setCode("");
