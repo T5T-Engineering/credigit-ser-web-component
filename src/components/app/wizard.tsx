@@ -238,7 +238,7 @@ export function Wizard({
         >
           <div className="h-full rounded-full bg-action transition-[width] duration-300 ease-bolt" style={{ width: `${Math.max(progress, 0.02) * 100}%` }} />
         </div>
-        <ol ref={stepperRef} data-layout={compact ? "compact" : "full"} className={cx("flex min-w-0 overflow-x-auto pb-1", compact ? "gap-1" : "gap-2")}>
+        <ol ref={stepperRef} data-layout={compact ? "compact" : "full"} className={cx("relative flex min-w-0 overflow-x-auto pb-1", compact ? "gap-1" : "gap-2")}>
           {steps.map((s, i) => {
             const status = statusOf(s, i);
             const jump = canJump(s, i);

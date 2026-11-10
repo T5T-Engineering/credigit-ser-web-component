@@ -15,7 +15,7 @@ export type TableProps = ComponentProps<"table"> & {
 /** Bolt data table: rounded scrolling wrapper, soft grey rounded header row, hairline row dividers. */
 export function Table({ striped = false, stickyHeader = false, containerClassName, className, ...props }: TableProps) {
   return (
-    <div className={cx("w-full rounded-2xl squircle", stickyHeader ? "overflow-auto" : "overflow-x-auto", containerClassName)}>
+    <div className={cx("relative w-full rounded-2xl squircle", stickyHeader ? "overflow-auto" : "overflow-x-auto", containerClassName)}>
       <table
         className={cx(
           "w-full border-separate border-spacing-0 text-start text-sm text-fg-muted",

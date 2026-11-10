@@ -56,11 +56,15 @@ export function useDialog(open: boolean, onOpenChange: (open: boolean) => void) 
 
   const dialogProps = {
     ref,
+    // React bubbles cancel/close from nested dialogs (e.g. a confirm inside a Drawer) up to parents:
+    // only react to events that belong to this dialog.
     onCancel: (event: SyntheticEvent<HTMLDialogElement>) => {
+      if (event.target !== event.currentTarget) return;
       event.preventDefault();
       requestClose();
     },
-    onClose: () => {
+    onClose: (event: SyntheticEvent<HTMLDialogElement>) => {
+      if (event.target !== event.currentTarget) return;
       // Closed by the platform (e.g. form method="dialog"): sync state.
       if (open) requestClose();
     },
