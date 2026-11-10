@@ -160,7 +160,7 @@ export function Menu({ trigger, items, align = "start", triggerLabel, triggerCla
           aria-labelledby={triggerId}
           onKeyDown={onMenuKeyDown}
           className={cx(
-            "squircle absolute top-full z-50 mt-2 min-w-56 rounded-2xl bg-surface p-1.5 shadow-md",
+            "squircle absolute top-full z-50 mt-2 max-h-[calc(100dvh-6rem)] min-w-56 overflow-y-auto overscroll-contain rounded-2xl bg-surface p-1.5 shadow-md",
             align === "end" ? "right-0" : "left-0",
             menuClassName,
           )}
