@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
-import { BrandProvider, defaultBrand } from "../../brand";
+import { BrandProvider, defaultBrand, FONT_LINK_ID, fontOptions } from "../../brand";
 import { BrandSettingsPanel, contrastRatio, validateLogoFile } from "./brand-settings-panel";
 
 const mocks = vi.hoisted(() => ({ updateBrand: vi.fn(), resetBrand: vi.fn(), useMock: { current: false } }));
@@ -89,7 +89,58 @@ describe("BrandSettingsPanel (mocked brand)", () => {
   });
 });
 
+describe("BrandSettingsPanel font (mocked brand)", () => {
+  beforeEach(() => {
+    mocks.useMock.current = true;
+    mocks.updateBrand.mockReset();
+  });
+  afterEach(() => {
+    mocks.useMock.current = false;
+  });
+
+  it("lists the font catalogue and calls updateBrand on select", async () => {
+    const user = userEvent.setup();
+    render(<BrandSettingsPanel />);
+    const select = screen.getByLabelText("Application font");
+    expect(select).toHaveValue("Baloo 2");
+    expect(screen.getAllByRole("option")).toHaveLength(fontOptions.length);
+    await user.selectOptions(select, "Inter");
+    expect(mocks.updateBrand).toHaveBeenLastCalledWith({ font: { family: "Inter", source: "google" } });
+  });
+
+  it("applies a custom Google Font on Enter and rejects unsafe names", async () => {
+    const user = userEvent.setup();
+    render(<BrandSettingsPanel />);
+    const input = screen.getByLabelText("Custom Google Font");
+    await user.type(input, "Inter; } body{{");
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("alert")).toHaveTextContent(/letters, digits, spaces and hyphens/);
+    expect(mocks.updateBrand).not.toHaveBeenCalled();
+
+    await user.clear(input);
+    await user.type(input, "Work Sans");
+    await user.tab();
+    expect(mocks.updateBrand).toHaveBeenLastCalledWith({ font: { family: "Work Sans", source: "google" } });
+  });
+});
+
 describe("BrandSettingsPanel (real provider)", () => {
+  it("switches the document font and reset restores Baloo 2", async () => {
+    const user = userEvent.setup();
+    render(
+      <BrandProvider persist={false}>
+        <BrandSettingsPanel />
+      </BrandProvider>,
+    );
+    await user.selectOptions(screen.getByLabelText("Application font"), "Manrope");
+    await waitFor(() => expect(document.documentElement.style.getPropertyValue("--cg-font-family")).toBe('"Manrope"'));
+    expect(document.getElementById(FONT_LINK_ID)).not.toBeNull();
+    await user.click(screen.getByRole("button", { name: /reset to credigit defaults/i }));
+    await waitFor(() => expect(screen.getByLabelText("Application font")).toHaveValue("Baloo 2"));
+    expect(document.documentElement.style.getPropertyValue("--cg-font-family")).toBe('"Baloo 2"');
+    expect(document.getElementById(FONT_LINK_ID)).toBeNull();
+  });
+
   it("applies colours to the document and resets them", async () => {
     const user = userEvent.setup();
     render(

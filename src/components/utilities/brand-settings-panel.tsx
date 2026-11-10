@@ -1,9 +1,19 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, ImagePlus, RotateCcw, Trash2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, ImagePlus, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useId, useState, type ChangeEvent, type ComponentProps, type ReactNode } from "react";
 
-import { defaultBrand, isHexColor, Logo, useBrand, type BrandColors, type BrandLogos } from "../../brand";
+import {
+  defaultBrand,
+  findFontOption,
+  fontOptions,
+  isHexColor,
+  isSafeFontFamily,
+  Logo,
+  useBrand,
+  type BrandColors,
+  type BrandLogos,
+} from "../../brand";
 import { cx } from "../../utils/cx";
 
 /** Maximum logo upload size in bytes (512 KB). */
@@ -82,6 +92,10 @@ const inputClass =
 const ghostButton =
   "squircle inline-flex h-control-sm min-w-8 items-center justify-center gap-1.5 rounded-full bg-fg/5 px-3.5 text-sm font-semibold text-fg transition-[background-color,transform] duration-150 ease-bolt hover:bg-fg/10 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus";
 const eyebrow = "font-mono text-xs uppercase tracking-[0.08em] text-fg-muted";
+const CUSTOM_FONT = "__custom__";
+/** Sample line for the font preview (includes the Naira sign and figures). */
+const FONT_SAMPLE = "Portfolio at a glance · ₦1,284,550.00 · 98.6%";
+const fontStack = (family: string) => `"${family}", "Baloo 2", ui-sans-serif, sans-serif`;
 
 /** Props for {@link BrandSettingsPanel}. */
 export type BrandSettingsPanelProps = Omit<ComponentProps<"section">, "title"> & {
@@ -90,12 +104,12 @@ export type BrandSettingsPanelProps = Omit<ComponentProps<"section">, "title"> &
 };
 
 /**
- * Runtime brand editor: colours, brand name and logos. Every valid change is applied immediately
+ * Runtime brand editor: colours, brand name, logos and application font. Every valid change is applied immediately
  * through `useBrand().updateBrand`, so the whole product (and the live preview) restyles at once.
  */
 export function BrandSettingsPanel({
   title = "Brand settings",
-  description = "Change colours, name and logos. Changes apply across the whole product immediately.",
+  description = "Change colours, name, logos and font. Changes apply across the whole product immediately.",
   className,
   ...props
 }: BrandSettingsPanelProps) {
@@ -104,11 +118,38 @@ export function BrandSettingsPanel({
   const [drafts, setDrafts] = useState<BrandColors>(brand.colors);
   const [name, setName] = useState(brand.name);
   const [logoErrors, setLogoErrors] = useState<Partial<Record<LogoKey, string>>>({});
+  const fontFamily = brand.font.family;
+  const catalogueFont = findFontOption(fontFamily);
+  const [customFont, setCustomFont] = useState(catalogueFont ? "" : fontFamily);
+  const [customFontError, setCustomFontError] = useState<string | null>(null);
 
   // Follow external brand changes (reset, other panels, stored brand loading after mount).
   const { primary, accent, neutral } = brand.colors;
   useEffect(() => setDrafts({ primary, accent, neutral }), [primary, accent, neutral]);
   useEffect(() => setName(brand.name), [brand.name]);
+  useEffect(() => {
+    setCustomFont(findFontOption(fontFamily) ? "" : fontFamily);
+    setCustomFontError(null);
+  }, [fontFamily]);
+
+  const onFontSelect = (value: string) => {
+    const option = findFontOption(value);
+    if (option) updateBrand({ font: { family: option.family, source: option.source } });
+  };
+
+  const applyCustomFont = () => {
+    const value = customFont.trim().replace(/\s+/g, " ");
+    if (!value || value === fontFamily) {
+      setCustomFontError(null);
+      return;
+    }
+    if (!isSafeFontFamily(value)) {
+      setCustomFontError("Use a Google Fonts family name: letters, digits, spaces and hyphens only.");
+      return;
+    }
+    setCustomFontError(null);
+    updateBrand({ font: { family: value, source: "google" } });
+  };
 
   const setColor = (key: ColorKey, value: string) => {
     setDrafts((d) => ({ ...d, [key]: value }));
@@ -135,6 +176,8 @@ export function BrandSettingsPanel({
     setDrafts(defaultBrand.colors);
     setName(defaultBrand.name);
     setLogoErrors({});
+    setCustomFont("");
+    setCustomFontError(null);
   };
 
   // Buttons and links use a deeper shade of the accent (--cg-accent-600 = 84% accent + black),
@@ -244,6 +287,88 @@ export function BrandSettingsPanel({
                   ? "This is below the WCAG AA minimum of 4.5:1, so white text on primary buttons and accent links may be hard to read. Consider a darker accent."
                   : "Meets WCAG AA for normal text."}
               </span>
+            </div>
+          </fieldset>
+
+          {/* Font */}
+          <fieldset className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
+            <legend className={cx(eyebrow, "mb-3")}>Font</legend>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={`${uid}-font`} className="text-sm font-semibold text-fg">
+                Application font
+              </label>
+              <div className="relative">
+                <select
+                  id={`${uid}-font`}
+                  className={cx(inputClass, "cursor-pointer appearance-none pr-10 [&>option]:bg-surface [&>option]:text-fg")}
+                  value={catalogueFont ? catalogueFont.family : CUSTOM_FONT}
+                  aria-describedby={`${uid}-font-hint`}
+                  onChange={(e) => onFontSelect(e.target.value)}
+                >
+                  {fontOptions.map((option) => (
+                    <option key={option.family} value={option.family} style={{ fontFamily: fontStack(option.family) }}>
+                      {option.label}
+                    </option>
+                  ))}
+                  {!catalogueFont && (
+                    <option value={CUSTOM_FONT} style={{ fontFamily: fontStack(fontFamily) }}>
+                      Custom: {fontFamily}
+                    </option>
+                  )}
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-fg-muted"
+                />
+              </div>
+              <p id={`${uid}-font-hint`} className="text-xs text-fg-muted">
+                Headings, text, labels and figures. Baloo 2 is self-hosted; other fonts load from Google Fonts.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={`${uid}-font-custom`} className="text-sm font-semibold text-fg">
+                Custom Google Font
+              </label>
+              <input
+                id={`${uid}-font-custom`}
+                className={inputClass}
+                value={customFont}
+                placeholder="e.g. Work Sans"
+                spellCheck={false}
+                autoComplete="off"
+                maxLength={64}
+                aria-invalid={Boolean(customFontError)}
+                aria-describedby={`${uid}-font-custom-hint`}
+                onChange={(e) => {
+                  setCustomFont(e.target.value);
+                  if (customFontError) setCustomFontError(null);
+                }}
+                onBlur={applyCustomFont}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    applyCustomFont();
+                  }
+                }}
+              />
+              <p
+                id={`${uid}-font-custom-hint`}
+                role={customFontError ? "alert" : undefined}
+                className={cx("text-xs", customFontError ? "font-medium text-danger-strong" : "text-fg-muted")}
+              >
+                {customFontError ?? "Exact family name from fonts.google.com. Applied on Enter or when you leave the field."}
+              </p>
+            </div>
+
+            <div role="group" aria-label="Font preview" className="squircle flex flex-col gap-1 rounded-3xl bg-surface-sunken p-4">
+              <span className={eyebrow}>{fontFamily}</span>
+              <p className="text-xl font-bold tracking-tight text-fg" style={{ fontFamily: fontStack(fontFamily) }}>
+                {FONT_SAMPLE}
+              </p>
+              <p className="text-sm text-fg-muted" style={{ fontFamily: fontStack(fontFamily) }}>
+                Regular body text for risk summaries and reports.
+              </p>
             </div>
           </fieldset>
 
