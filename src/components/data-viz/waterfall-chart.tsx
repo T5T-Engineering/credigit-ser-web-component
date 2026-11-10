@@ -9,6 +9,7 @@ import {
   legendChipClass,
   legendDotClass,
   niceCeil,
+  resolveYDomain,
   type ChartTone,
 } from "./chart-utils";
 
@@ -49,6 +50,23 @@ export function computeWaterfall(steps: WaterfallStep[]): WaterfallBar[] {
   });
 }
 
+/**
+ * Value-axis range for a waterfall with a broken (non-zero) baseline.
+ * `baseline` = a number (axis minimum) or `"auto"` (padded range of the running levels, so small movements stay visible
+ * next to large totals). Returns `null` when no break is needed (the axis already reaches 0).
+ */
+export function waterfallAxis(bars: WaterfallBar[], baseline: number | "auto"): { min: number; max: number } | null {
+  const levels = bars.flatMap((b) => (b.type === "delta" ? [b.from, b.to] : [b.to]));
+  if (levels.length === 0) return null;
+  const [autoMin, autoMax] = resolveYDomain(levels, "auto");
+  const min = baseline === "auto" ? autoMin : baseline;
+  const top = Math.max(...levels);
+  const max = autoMax > min ? Math.max(autoMax, top) : min + (Math.abs(min) * 0.1 || 1);
+  // Only a positive floor is a break; at or below 0 the normal zero-based axis is used.
+  if (!(min > 0) || min >= top) return null;
+  return { min, max };
+}
+
 /** Props for {@link WaterfallChart}. */
 export type WaterfallChartProps = Omit<ComponentProps<"figure">, "children"> & {
   steps: WaterfallStep[];
@@ -67,6 +85,14 @@ export type WaterfallChartProps = Omit<ComponentProps<"figure">, "children"> & {
   showLegend?: boolean;
   /** Legend / table names. */
   legendLabels?: { increase?: string; decrease?: string; total?: string };
+  /**
+   * Start the value axis above 0 so movements aren't dwarfed by large opening/closing values:
+   * a number (axis minimum) or `"auto"`. Start/total bars are drawn truncated with an axis-break mark and a note.
+   * Default: axis starts at 0.
+   */
+  baseline?: number | "auto";
+  /** Note shown under a broken axis. Default: `Axis starts at {min}; opening and closing bars are truncated.` */
+  axisBreakNote?: (formattedMin: string) => string;
   /** Accessible name. */
   label?: string;
 };
@@ -83,6 +109,8 @@ export function WaterfallChart({
   showValues = true,
   showLegend = true,
   legendLabels,
+  baseline,
+  axisBreakNote = (min) => `Axis starts at ${min}; opening and closing bars are truncated.`,
   label = "Waterfall chart",
   className,
   ...props
@@ -94,10 +122,12 @@ export function WaterfallChart({
   const extremes = bars.flatMap((b) => [b.from, b.to]);
   const rawMax = Math.max(0, ...extremes);
   const rawMin = Math.min(0, ...extremes);
-  const maxY = rawMax > 0 ? niceCeil(rawMax) : 0;
-  const minY = rawMin < 0 ? -niceCeil(-rawMin) : 0;
+  const broken = baseline !== undefined ? waterfallAxis(bars, baseline) : null;
+  const maxY = broken ? broken.max : rawMax > 0 ? niceCeil(rawMax) : 0;
+  const minY = broken ? broken.min : rawMin < 0 ? -niceCeil(-rawMin) : 0;
   const span = maxY - minY || 1;
-  const yPct = (v: number) => ((v - minY) / span) * 100; // from the bottom
+  const yPct = (v: number) => ((Math.max(v, minY) - minY) / span) * 100; // from the bottom, clipped at the axis floor
+  const baselineValue = broken ? minY : 0;
   const n = Math.max(bars.length, 1);
   const cols = { gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` };
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => minY + span * t);
@@ -126,7 +156,7 @@ export function WaterfallChart({
                 <span
                   key={t}
                   className="absolute inset-x-0 h-px"
-                  style={{ bottom: `${yPct(t)}%`, backgroundColor: t === 0 ? baselineColor : gridColor }}
+                  style={{ bottom: `${yPct(t)}%`, backgroundColor: t === baselineValue ? baselineColor : gridColor }}
                 />
               ))}
               <div className="absolute inset-0 grid" style={cols}>
@@ -136,6 +166,7 @@ export function WaterfallChart({
                   const bottom = yPct(lo);
                   const h = yPct(hi) - bottom;
                   const next = bars[i + 1];
+                  const truncated = broken !== null && lo < minY;
                   return (
                     <div key={`${b.label}-${i}`} className="relative h-full">
                       <div
@@ -143,12 +174,16 @@ export function WaterfallChart({
                         data-type={b.type}
                         data-from={b.from}
                         data-to={b.to}
+                        data-truncated={truncated || undefined}
                         className={cx(
                           "absolute inset-x-[18%] mx-auto max-w-14 rounded-lg transition-[height,bottom,opacity] duration-500 ease-bolt hover:opacity-85",
                           b.type !== "delta" && "rounded-t-xl rounded-b-sm",
                         )}
                         style={{ bottom: `${bottom}%`, height: `${h}%`, minHeight: "0.25rem", backgroundColor: colorOf(b) }}
-                      />
+                      >
+                        {/* Axis break: a slanted surface-coloured gap near the foot of a truncated bar. */}
+                        {truncated && <span className="absolute -inset-x-1 bottom-2.5 h-1.5 -skew-y-12 bg-surface" />}
+                      </div>
                       {/* Connector: from this bar's end level to the next bar. */}
                       {next && (
                         <span
@@ -179,6 +214,11 @@ export function WaterfallChart({
           </div>
         </div>
       </div>
+      {broken && (
+        <p data-axis-break className="mt-2 pl-14 text-xs text-fg-muted">
+          {axisBreakNote(valueFormatter(minY))}
+        </p>
+      )}
       {showLegend && (
         <figcaption aria-hidden="true" className="mt-4 flex flex-wrap gap-2 pl-14">
           {[

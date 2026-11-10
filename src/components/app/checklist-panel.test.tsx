@@ -37,3 +37,12 @@ describe("ChecklistPanel", () => {
     expect(screen.getByRole("checkbox", { name: "Valuation report" })).toBeDisabled();
   });
 });
+
+describe("ChecklistPanel props type", () => {
+  it("accepts the checklist onToggle without a cast (native onToggle omitted)", () => {
+    const onToggle = (id: string, status: "met" | "pending" | "waived" | "deferred" | "breached") => void [id, status];
+    const props: import("./checklist-panel").ChecklistPanelProps = { items, onToggle };
+    render(<ChecklistPanel {...props} />);
+    expect(screen.getAllByRole("checkbox").length).toBeGreaterThan(0);
+  });
+});

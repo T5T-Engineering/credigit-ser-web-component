@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { Alert } from "./alert";
-import { Card } from "./card";
+import { Card, CardDescription, CardHeader, CardTitle } from "./card";
 import { Hero } from "./hero";
 import { Teaser } from "./teaser";
 
@@ -40,5 +40,33 @@ describe("block style props", () => {
       </div>,
     );
     expect(screen.getByRole("status")).not.toHaveAttribute("data-cg-theme");
+  });
+});
+
+describe("CardHeader layout", () => {
+  it("row (default) keeps children side by side", () => {
+    render(
+      <CardHeader data-testid="h">
+        <CardTitle>Title</CardTitle>
+      </CardHeader>,
+    );
+    const header = screen.getByTestId("h");
+    expect(header).not.toHaveAttribute("data-layout");
+    expect(header.firstElementChild?.tagName).toBe("H3");
+  });
+
+  it("stack puts title above description and actions on the right", () => {
+    render(
+      <CardHeader data-testid="h" layout="stack" actions={<button type="button">Export</button>}>
+        <CardTitle>Portfolio</CardTitle>
+        <CardDescription>By sector</CardDescription>
+      </CardHeader>,
+    );
+    const header = screen.getByTestId("h");
+    expect(header).toHaveAttribute("data-layout", "stack");
+    const [text, actions] = Array.from(header.children);
+    expect(text?.className).toContain("flex-col");
+    expect(text).toHaveTextContent("PortfolioBy sector");
+    expect(actions).toContainElement(screen.getByRole("button", { name: "Export" }));
   });
 });

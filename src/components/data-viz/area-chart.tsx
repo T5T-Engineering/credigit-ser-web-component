@@ -1,6 +1,7 @@
 import { useId, type ComponentProps } from "react";
 
 import { cx } from "../../utils/cx";
+import { ReferenceLineOverlay } from "./chart-overlays";
 import {
   baselineColor,
   defaultFormatter,
@@ -8,11 +9,13 @@ import {
   legendChipClass,
   legendDotClass,
   lineStroke,
-  niceCeil,
+  resolveYDomain,
   round,
   seriesColor,
   svgId,
+  type ChartReferenceLine,
   type ChartTone,
+  type YDomain,
 } from "./chart-utils";
 
 /** One area series. Points share the x categories of the first series (matched by index). */
@@ -26,6 +29,10 @@ export type AreaChartProps = Omit<ComponentProps<"figure">, "children"> & {
   /** Plot height in px. Default 220. */
   height?: number;
   yFormatter?: (value: number) => string;
+  /** Value-axis domain: `[min, max]`, or `"auto"` (padded data range, non-zero baseline). Default: nice bounds including 0. */
+  yDomain?: YDomain;
+  /** Horizontal reference lines (target, limit, appetite …). */
+  referenceLines?: ChartReferenceLine[];
   /** Pill legend. Default: shown when there is more than one series. */
   showLegend?: boolean;
   /** Accessible name. */
@@ -38,6 +45,8 @@ export function AreaChart({
   stacked = false,
   height = 220,
   yFormatter = defaultFormatter,
+  yDomain,
+  referenceLines = [],
   showLegend,
   label = "Area chart",
   className,
@@ -61,14 +70,14 @@ export function AreaChart({
   });
 
   const all = bands.flatMap((b) => b.tops);
-  const rawMin = Math.min(0, ...all);
-  const rawMax = Math.max(0, ...all);
-  const maxY = rawMax > 0 ? niceCeil(rawMax) : 0;
-  const minY = rawMin < 0 ? -niceCeil(-rawMin) : 0;
+  const [minY, maxY] = resolveYDomain([...all, ...referenceLines.map((r) => r.value)], yDomain);
   const span = maxY - minY || 1;
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((t) => minY + span * t);
   const xAt = (i: number) => (n <= 1 ? 50 : round((i / (n - 1)) * 100));
   const yAt = (v: number) => round(100 - ((v - minY) / span) * 100);
+  // Areas fill down to 0, or to the bottom of the axis when 0 is outside the domain.
+  const floor = (v: number) => Math.min(maxY, Math.max(minY, v));
+  const baselineValue = minY <= 0 && maxY >= 0 ? 0 : minY;
   const step = Math.max(1, Math.ceil(n / 8));
   const legend = showLegend ?? series.length > 1;
   const summary = series.map((s) => `${s.name}: ${s.points.map((p) => `${p.x} ${yFormatter(p.y)}`).join(", ")}`).join(". ");
@@ -95,12 +104,12 @@ export function AreaChart({
                 ))}
               </defs>
               {ticks.map((t) => (
-                <line key={t} x1="0" x2="100" y1={yAt(t)} y2={yAt(t)} style={{ stroke: t === 0 ? baselineColor : gridColor }} vectorEffect="non-scaling-stroke" />
+                <line key={t} x1="0" x2="100" y1={yAt(t)} y2={yAt(t)} style={{ stroke: t === baselineValue ? baselineColor : gridColor }} vectorEffect="non-scaling-stroke" />
               ))}
               {n > 1 &&
                 bands.map((b, i) => {
                   const top = b.tops.map((v, pi) => `${xAt(pi)},${yAt(v)}`);
-                  const bottom = b.bottoms.map((v, pi) => `${xAt(pi)},${yAt(Math.max(minY, v))}`).reverse();
+                  const bottom = b.bottoms.map((v, pi) => `${xAt(pi)},${yAt(floor(v))}`).reverse();
                   return <polygon key={b.name} data-series={b.name} points={[...top, ...bottom].join(" ")} fill={`url(#${uid}-area-${i})`} />;
                 })}
               {bands.map((b) => (
@@ -116,6 +125,7 @@ export function AreaChart({
                 />
               ))}
             </svg>
+            <ReferenceLineOverlay lines={referenceLines} topPct={yAt} height={height} />
             <div className="relative mt-2.5 h-4" aria-hidden="true">
               {categories.map((c, i) =>
                 i % step === 0 || i === n - 1 ? (

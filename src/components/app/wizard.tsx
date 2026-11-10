@@ -47,6 +47,12 @@ export type WizardProps = Omit<ComponentProps<"div">, "onSubmit" | "title"> & {
   allowStepNavigation?: boolean;
   /** Submitting state (spinner on Submit). */
   submitting?: boolean;
+  /**
+   * Stepper layout. `"auto"` (default): full pills (number + title) while they fit, otherwise compact number-only pills
+   * with the current step's title (titles stay available as tooltips and to screen readers). The stepper also scrolls
+   * horizontally rather than widening the page. `"full"` / `"compact"` force a layout.
+   */
+  stepperLayout?: "auto" | "full" | "compact";
   /** Labels (i18n). */
   labels?: { back?: string; next?: string; submit?: string; saveDraft?: string; optional?: string; stepOf?: (n: number, total: number) => string; error?: string };
 };
@@ -70,6 +76,7 @@ export function Wizard({
   allowStepNavigation = true,
   submitting = false,
   labels = {},
+  stepperLayout = "auto",
   className,
   ...props
 }: WizardProps) {
@@ -86,6 +93,46 @@ export function Wizard({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const prevStep = useRef(currentId);
   const last = index === steps.length - 1;
+  const stepperRef = useRef<HTMLOListElement>(null);
+  const fullWidthNeeded = useRef(0);
+  const [autoCompact, setAutoCompact] = useState(false);
+  const compactRef = useRef(false);
+  compactRef.current = autoCompact;
+  const compact = stepperLayout === "compact" || (stepperLayout === "auto" && autoCompact);
+  const titleKey = steps.map((s) => (typeof s.title === "string" ? s.title : s.id)).join("|");
+
+  // Auto layout: remember how wide the full stepper is and switch to compact pills when it doesn't fit.
+  const measuredKey = useRef<string | null>(null);
+  useEffect(() => {
+    const el = stepperRef.current;
+    if (stepperLayout !== "auto" || !el) return;
+    // Steps changed while compact: render the full stepper first, then measure it (this effect re-runs).
+    if (autoCompact && measuredKey.current !== titleKey) {
+      setAutoCompact(false);
+      return;
+    }
+    const measure = () => {
+      if (!compactRef.current) {
+        fullWidthNeeded.current = el.scrollWidth;
+        measuredKey.current = titleKey;
+      }
+      const next = fullWidthNeeded.current > el.clientWidth + 1;
+      if (next !== compactRef.current) {
+        compactRef.current = next;
+        setAutoCompact(next);
+      }
+    };
+    measure();
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    observer?.observe(el);
+    return () => observer?.disconnect();
+  }, [stepperLayout, titleKey, autoCompact]);
+
+  // Keep the current step visible when the stepper scrolls.
+  useEffect(() => {
+    const item = stepperRef.current?.querySelector<HTMLElement>('[aria-current="step"]');
+    if (item && typeof item.scrollIntoView === "function") item.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [index, compact]);
 
   const L = {
     back: labels.back ?? "Back",
@@ -174,8 +221,8 @@ export function Wizard({
   const currentError = current ? errors[current.id] : undefined;
 
   return (
-    <div className={cx("flex flex-col gap-6", className)} {...props}>
-      <nav aria-label="Progress" className="flex flex-col gap-3">
+    <div className={cx("flex min-w-0 flex-col gap-6", className)} {...props}>
+      <nav aria-label="Progress" className="flex min-w-0 flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
           <p className="font-mono text-xs font-medium tracking-[0.08em] text-fg-muted uppercase">{L.stepOf(index + 1, steps.length)}</p>
           <p className="font-mono text-xs text-fg-muted">{Math.round(progress * 100)}%</p>
@@ -191,7 +238,7 @@ export function Wizard({
         >
           <div className="h-full rounded-full bg-action transition-[width] duration-300 ease-bolt" style={{ width: `${Math.max(progress, 0.02) * 100}%` }} />
         </div>
-        <ol className="flex gap-2 overflow-x-auto pb-1">
+        <ol ref={stepperRef} data-layout={compact ? "compact" : "full"} className={cx("flex min-w-0 overflow-x-auto pb-1", compact ? "gap-1" : "gap-2")}>
           {steps.map((s, i) => {
             const status = statusOf(s, i);
             const jump = canJump(s, i);
@@ -209,7 +256,10 @@ export function Wizard({
                 {status === "complete" ? <Check className="size-4" /> : status === "error" ? <CircleAlert className="size-4" /> : i + 1}
               </span>
             );
-            const text = (
+            const showText = !compact || i === index;
+            const text = !showText ? (
+              <span className="sr-only">{s.title}</span>
+            ) : (
               <span className="flex min-w-0 flex-col text-left leading-tight">
                 <span className={cx("truncate text-sm font-semibold", status === "upcoming" ? "text-fg-muted" : "text-fg")}>{s.title}</span>
                 {s.optional ? <span className="text-xs text-fg-muted">{L.optional}</span> : null}
@@ -217,19 +267,21 @@ export function Wizard({
             );
             const srStatus = <span className="sr-only">{status === "complete" ? " (completed)" : status === "error" ? " (has errors)" : status === "current" ? " (current)" : ""}</span>;
             const cls = cx(
-              "squircle flex max-w-56 min-w-0 shrink-0 items-center gap-2.5 rounded-full py-1.5 pr-4 pl-1.5",
+              "squircle flex max-w-56 min-w-0 shrink-0 items-center gap-2.5 rounded-full py-1.5 pl-1.5",
+              showText ? "pr-4" : "pr-1.5",
               status === "current" ? "bg-fg/5" : "",
             );
+            const tip = !showText && typeof s.title === "string" ? s.title : undefined;
             return (
               <li key={s.id} aria-current={i === index ? "step" : undefined} className="flex shrink-0">
                 {jump ? (
-                  <button type="button" onClick={() => goTo(s.id)} className={cx(cls, "cursor-pointer transition-colors hover:bg-fg/5", focusRing)}>
+                  <button type="button" title={tip} onClick={() => goTo(s.id)} className={cx(cls, "cursor-pointer transition-colors hover:bg-fg/5", focusRing)}>
                     {marker}
                     {text}
                     {srStatus}
                   </button>
                 ) : (
-                  <span className={cls}>
+                  <span className={cls} title={tip}>
                     {marker}
                     {text}
                     {srStatus}

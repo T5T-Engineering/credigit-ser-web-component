@@ -9,7 +9,7 @@ export type ButtonVariant = "primary" | "secondary" | "tertiary" | "text" | "dan
 export type ButtonSize = "small" | "medium" | "large";
 
 const base =
-  "relative inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-full squircle font-sans font-semibold leading-none tracking-[-0.005em] no-underline " +
+  "relative inline-flex shrink-0 items-center justify-center squircle font-sans font-semibold tracking-[-0.005em] no-underline " +
   "transition-[background-color,color,box-shadow,transform] duration-150 ease-bolt active:scale-[0.98] select-none " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus " +
   "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 aria-busy:cursor-progress";
@@ -20,6 +20,15 @@ const variantClasses: Record<ButtonVariant, string> = {
   tertiary: "bg-fg/5 text-fg hover:bg-fg/10 active:bg-fg/15",
   text: "bg-transparent text-fg hover:bg-fg/5 active:bg-fg/10",
   danger: "bg-danger-strong text-on-status hover:bg-[color-mix(in_oklab,var(--cg-danger)_68%,black)]",
+};
+
+/* Single-line pill (default) vs. multi-line chip (`wrap`): auto height, squircle corners instead of a pill. */
+const singleLine = "whitespace-nowrap rounded-full leading-none";
+const multiLine = "h-auto whitespace-normal text-balance rounded-3xl leading-snug";
+const wrapSizeClasses: Record<ButtonSize, string> = {
+  small: "min-h-control-sm min-w-6 gap-1.5 px-3 py-1.5 text-sm",
+  medium: "min-h-control-md min-w-6 gap-2 px-4 py-2 text-base",
+  large: "min-h-control-lg min-w-6 gap-3 px-6 py-3 text-lg",
 };
 
 /* Bolt sizes: small 32px / 14px, medium 40px / 16px, large 48px / 18px with 24px padding. */
@@ -48,6 +57,8 @@ export type ButtonStyleOptions = {
   fullWidth?: boolean;
   /** Circular button sized for a single icon (used by IconButton). */
   iconOnly?: boolean;
+  /** Allow the label to wrap onto several lines (auto height, `rounded-3xl`), e.g. suggestion chips. Ignored with `iconOnly`. */
+  wrap?: boolean;
   className?: string;
 };
 
@@ -57,14 +68,18 @@ export function buttonStyles({
   size = "medium",
   fullWidth = false,
   iconOnly = false,
+  wrap = false,
   className,
 }: ButtonStyleOptions = {}): string {
+  const multi = wrap && !iconOnly;
   const sizing = iconOnly
     ? iconOnlySizeClasses[size]
-    : variant === "text"
-      ? textSizeClasses[size]
-      : sizeClasses[size];
-  return cx(base, variantClasses[variant], sizing, fullWidth && "w-full", className);
+    : multi
+      ? wrapSizeClasses[size]
+      : variant === "text"
+        ? textSizeClasses[size]
+        : sizeClasses[size];
+  return cx(base, multi ? multiLine : singleLine, variantClasses[variant], sizing, fullWidth && "w-full", className);
 }
 
 type ButtonOwnProps = {
@@ -78,6 +93,8 @@ type ButtonOwnProps = {
   fullWidth?: boolean;
   /** Circular, icon-only sizing (prefer `IconButton`). */
   iconOnly?: boolean;
+  /** Multi-line label: auto height and `rounded-3xl` instead of a pill (suggestion chips, long prompts). Default false. */
+  wrap?: boolean;
   /** Shows a spinner, sets `aria-busy` and blocks interaction. */
   loading?: boolean;
   /** Renders an `<a>` (or the `as` component) instead of a `<button>`. */
@@ -101,6 +118,7 @@ export function Button({
   iconAfter,
   fullWidth = false,
   iconOnly = false,
+  wrap = false,
   loading = false,
   href,
   as,
@@ -111,7 +129,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const inactive = Boolean(disabled || loading);
-  const classes = buttonStyles({ variant, size, fullWidth, iconOnly, className });
+  const classes = buttonStyles({ variant, size, fullWidth, iconOnly, wrap, className });
   const spinnerSize = size === "large" ? 20 : size === "small" ? 14 : 16;
 
   const content = (

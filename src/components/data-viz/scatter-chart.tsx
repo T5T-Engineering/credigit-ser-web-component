@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { useId, type ComponentProps } from "react";
 
 import { cx } from "../../utils/cx";
 import {
@@ -10,15 +10,27 @@ import {
   legendDotClass,
   niceCeil,
   seriesColor,
+  svgId,
   type ChartTone,
 } from "./chart-utils";
 
-/** One point. `size` turns the series into bubbles (area ∝ size); `label` names the point (e.g. obligor). */
-export type ScatterPoint = { x: number; y: number; size?: number; label?: string };
+/**
+ * One point. `size` turns the series into bubbles (area ∝ size); `label` names the point (e.g. obligor; always in the tooltip
+ * and data table). `showLabel` prints the label on the chart for this point (`true`) or hides it (`false`), overriding `showLabels`.
+ */
+export type ScatterPoint = { x: number; y: number; size?: number; label?: string; showLabel?: boolean };
 /** One point series. */
 export type ScatterSeries = { name: string; points: ScatterPoint[]; tone?: ChartTone };
 /** Horizontal (`axis: "y"`) or vertical (`axis: "x"`) reference line, e.g. a hurdle rate. */
 export type ScatterReferenceLine = { axis: "x" | "y"; value: number; label?: string; tone?: ChartTone };
+/** Quadrant split at (`x`, `y`) with optional corner labels `[topLeft, topRight, bottomLeft, bottomRight]`. */
+export type ScatterQuadrants = {
+  x: number;
+  y: number;
+  labels?: [topLeft: string, topRight: string, bottomLeft: string, bottomRight: string];
+};
+/** Arrow from one data coordinate to another (e.g. the 360 RAR strategic-thrust vector). */
+export type ScatterVector = { from: { x: number; y: number }; to: { x: number; y: number }; label?: string; tone?: ChartTone };
 
 /** Props for {@link ScatterChart}. */
 export type ScatterChartProps = Omit<ComponentProps<"figure">, "children"> & {
@@ -34,8 +46,12 @@ export type ScatterChartProps = Omit<ComponentProps<"figure">, "children"> & {
   xDomain?: [number, number];
   yDomain?: [number, number];
   referenceLines?: ScatterReferenceLine[];
-  /** Print point labels next to the marks. Default false. */
+  /** Print point labels next to the marks. Default false. Per-point `showLabel` overrides it. */
   showLabels?: boolean;
+  /** Quadrant lines through (`x`, `y`) plus corner labels. */
+  quadrants?: ScatterQuadrants;
+  /** Direction arrow drawn over the points. */
+  vector?: ScatterVector;
   /** Bubble radius range in px when points have `size`. Default `[6, 26]`. */
   bubbleRange?: [number, number];
   showLegend?: boolean;
@@ -63,15 +79,26 @@ export function ScatterChart({
   yDomain,
   referenceLines = [],
   showLabels = false,
+  quadrants,
+  vector,
   bubbleRange = [6, 26],
   showLegend,
   label = "Scatter chart",
   className,
   ...props
 }: ScatterChartProps) {
+  const uid = svgId(useId());
   const pts = series.flatMap((s) => s.points);
   const refX = referenceLines.filter((r) => r.axis === "x").map((r) => r.value);
   const refY = referenceLines.filter((r) => r.axis === "y").map((r) => r.value);
+  if (quadrants) {
+    refX.push(quadrants.x);
+    refY.push(quadrants.y);
+  }
+  if (vector) {
+    refX.push(vector.from.x, vector.to.x);
+    refY.push(vector.from.y, vector.to.y);
+  }
   const xs = [...pts.map((p) => p.x), ...refX];
   const ys = [...pts.map((p) => p.y), ...refY];
   const [x0, x1] = xDomain ?? niceDomain(Math.min(0, ...xs), Math.max(0, ...xs));
@@ -88,7 +115,16 @@ export function ScatterChart({
   const colored = series.map((s, i) => ({ ...s, color: seriesColor(s.tone, i) }));
   const describe = (p: ScatterPoint) =>
     `${p.label ? `${p.label}: ` : ""}${xLabel ?? "x"} ${xFormatter(p.x)}, ${yLabel ?? "y"} ${yFormatter(p.y)}${p.size !== undefined ? `, size ${defaultFormatter(p.size)}` : ""}`;
-  const summary = colored.map((s) => `${s.name}: ${s.points.map(describe).join("; ")}`).join(". ");
+  const labelled = (p: ScatterPoint) => Boolean(p.label) && (p.showLabel ?? showLabels);
+  const extras = [
+    quadrants?.labels ? `Quadrants split at ${xLabel ?? "x"} ${xFormatter(quadrants.x)}, ${yLabel ?? "y"} ${yFormatter(quadrants.y)}: ${quadrants.labels.join(", ")}` : "",
+    vector
+      ? `${vector.label ?? "Vector"} from (${xFormatter(vector.from.x)}, ${yFormatter(vector.from.y)}) to (${xFormatter(vector.to.x)}, ${yFormatter(vector.to.y)})`
+      : "",
+  ].filter(Boolean);
+  const summary = [...colored.map((s) => `${s.name}: ${s.points.map(describe).join("; ")}`), ...extras].join(". ");
+  const vectorColor = chartToneColor[vector?.tone ?? "brand"];
+  const quadrantLabelClass = "absolute max-w-[45%] truncate font-mono text-xs font-medium uppercase tracking-[0.08em] text-fg-subtle";
 
   return (
     <figure className={cx("m-0 w-full", className)} {...props}>
@@ -114,6 +150,20 @@ export function ScatterChart({
               {ticks.map((t) => (
                 <span key={`v${t}`} className="absolute inset-y-0 w-px" style={{ left: `${t * 100}%`, backgroundColor: gridColor }} />
               ))}
+              {quadrants && (
+                <>
+                  <span data-quadrant="x" className="absolute inset-y-0 w-0.5 -translate-x-1/2 rounded-full" style={{ left: `${xPct(quadrants.x)}%`, backgroundColor: baselineColor }} />
+                  <span data-quadrant="y" className="absolute inset-x-0 h-0.5 translate-y-1/2 rounded-full" style={{ bottom: `${yPct(quadrants.y)}%`, backgroundColor: baselineColor }} />
+                  {quadrants.labels && (
+                    <>
+                      <span className={cx(quadrantLabelClass, "top-2 left-2")}>{quadrants.labels[0]}</span>
+                      <span className={cx(quadrantLabelClass, "top-2 right-2 text-right")}>{quadrants.labels[1]}</span>
+                      <span className={cx(quadrantLabelClass, "bottom-2 left-2")}>{quadrants.labels[2]}</span>
+                      <span className={cx(quadrantLabelClass, "right-2 bottom-2 text-right")}>{quadrants.labels[3]}</span>
+                    </>
+                  )}
+                </>
+              )}
               {referenceLines.map((r, i) => {
                 const color = chartToneColor[r.tone ?? "neutral"];
                 return r.axis === "y" ? (
@@ -149,10 +199,37 @@ export function ScatterChart({
                   );
                 }),
               )}
-              {showLabels &&
-                colored.map((s) =>
+              {vector && (
+                <svg data-vector className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+                  <defs>
+                    <marker id={`${uid}-arrow`} viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                      <path d="M 1 1 L 9 5 L 1 9 z" style={{ fill: vectorColor }} strokeLinejoin="round" />
+                    </marker>
+                  </defs>
+                  <circle cx={`${xPct(vector.from.x)}%`} cy={`${100 - yPct(vector.from.y)}%`} r={4} style={{ fill: vectorColor }} />
+                  <line
+                    x1={`${xPct(vector.from.x)}%`}
+                    y1={`${100 - yPct(vector.from.y)}%`}
+                    x2={`${xPct(vector.to.x)}%`}
+                    y2={`${100 - yPct(vector.to.y)}%`}
+                    style={{ stroke: vectorColor }}
+                    strokeWidth={3}
+                    strokeLinecap="round"
+                    markerEnd={`url(#${uid}-arrow)`}
+                  />
+                </svg>
+              )}
+              {vector?.label && (
+                <span
+                  className="absolute -translate-x-1/2 rounded-full bg-surface/85 px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-fg shadow-sm"
+                  style={{ left: `${xPct(vector.to.x)}%`, bottom: `calc(${yPct(vector.to.y)}% + 10px)` }}
+                >
+                  {vector.label}
+                </span>
+              )}
+              {colored.map((s) =>
                   s.points.map((p, pi) =>
-                    p.label ? (
+                    labelled(p) ? (
                       <span
                         key={`${s.name}-l${pi}`}
                         className="absolute translate-y-1/2 text-xs font-medium whitespace-nowrap text-fg"
