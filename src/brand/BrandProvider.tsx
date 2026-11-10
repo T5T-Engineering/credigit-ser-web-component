@@ -16,7 +16,7 @@ import {
 
 type BrandContextValue = {
   brand: BrandConfig;
-  /** Merge changes into the active brand and apply them everywhere. */
+  /** Merge changes (colours, logos, name, font) into the active brand and apply them everywhere. */
   updateBrand: (input: BrandInput) => void;
   /** Return to the configured base brand (Credigit defaults unless `initialBrand` was given). */
   resetBrand: () => void;
@@ -26,7 +26,7 @@ const BrandContext = createContext<BrandContextValue | null>(null);
 
 export type BrandProviderProps = {
   children: ReactNode;
-  /** Tenant or app-level overrides applied over the Credigit defaults. */
+  /** Tenant or app-level overrides applied over the Credigit defaults, e.g. `{ font: { family: "Inter" } }`. */
   initialBrand?: BrandInput;
   /** Persist user changes in localStorage so they survive reloads. Default true. */
   persist?: boolean;
@@ -35,7 +35,7 @@ export type BrandProviderProps = {
 
 /**
  * Wrap the app once at the root. All components and the <Logo> read from it,
- * so a colour or logo change here restyles the whole product.
+ * so a colour, logo or font change here restyles the whole product.
  */
 export function BrandProvider({ children, initialBrand, persist = true, storageKey = BRAND_STORAGE_KEY }: BrandProviderProps) {
   const base = useMemo(() => mergeBrand(defaultBrand, initialBrand), [initialBrand]);
@@ -57,6 +57,7 @@ export function BrandProvider({ children, initialBrand, persist = true, storageK
   const updateBrand = useCallback((input: BrandInput) => setBrand((current) => mergeBrand(current, input)), []);
   const resetBrand = useCallback(() => {
     clearBrand();
+    applyBrand(base); // re-apply tenant defaults (incl. font) even when the state is already `base`
     setBrand(base);
     if (persist) storeBrand(null, storageKey);
   }, [base, persist, storageKey]);

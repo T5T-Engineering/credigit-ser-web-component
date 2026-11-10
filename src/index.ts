@@ -8,3 +8,5 @@ export * from "./components/navigation";
 export * from "./components/blocks";
 export * from "./components/data-viz";
 export * from "./components/utilities";
+export * from "./components/data";
+export * from "./components/app";

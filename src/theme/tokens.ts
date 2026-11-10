@@ -20,11 +20,20 @@ export const colors = {
   info: "#2563EB",
 } as const;
 
+/**
+ * Default font stacks (Baloo 2). The live application font is runtime-switchable: CSS reads `var(--cg-font-family)`
+ * (set by BrandProvider / applyBrand, see `fontOptions`); read it with readBrandColor("--cg-font-family")
+ * or `useBrand().brand.font.family` when drawing on canvas / PDF.
+ */
 export const fonts = {
+  /** Default application font family (mirror of `defaultBrand.font.family`). */
+  family: defaultBrand.font.family,
+  /** CSS variable holding the live application font family. */
+  variable: "--cg-font-family",
   sans: '"Baloo 2", ui-sans-serif, system-ui, sans-serif',
   /** Labels and figures use the application font too (with tabular numbers). */
   mono: '"Baloo 2", ui-sans-serif, system-ui, sans-serif',
-  /** Code samples only. */
+  /** Code samples only (not affected by brand font changes). */
   code: '"IBM Plex Mono", ui-monospace, monospace',
 } as const;
 
@@ -38,7 +47,7 @@ export type SurfaceTheme = (typeof surfaceThemes)[number];
 
 export type Density = "compact" | "regular" | "spacious";
 
-/** Read the live value of a CSS variable, e.g. readBrandColor("--cg-brand-accent"). */
+/** Read the live value of a CSS variable, e.g. readBrandColor("--cg-brand-accent") or readBrandColor("--cg-font-family"). */
 export function readBrandColor(variable: string, el?: Element): string {
   if (typeof window === "undefined") return "";
   return getComputedStyle(el ?? document.documentElement).getPropertyValue(variable).trim();
