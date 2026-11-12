@@ -91,6 +91,7 @@ function wrapLabel(text: string, width = 16): string[] {
 export function RadarChart({
   axes,
   series,
+  // TD-010: apps pass the scoring scale.
   max = 100,
   levels = 5,
   size = 320,

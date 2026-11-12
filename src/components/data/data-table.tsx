@@ -137,6 +137,11 @@ export type DataTableProps<T> = Omit<ComponentProps<"div">, "children" | "onChan
   toolbar?: ReactNode;
   /** Adds an "Export CSV" button exporting the filtered, sorted rows (all pages). */
   exportFilename?: string;
+  /**
+   * Called before the CSV download with the exported rows (filtered + sorted, all pages). Return `false`
+   * (or resolve to it) to cancel, e.g. when the export permission is missing; use it to write the audit entry.
+   */
+  onExport?: (rows: T[], filename: string) => boolean | void | Promise<boolean | void>;
   exportLabel?: string;
   /** Card renderer used below the `md` breakpoint instead of the table. */
   mobileCard?: (row: T) => ReactNode;
@@ -231,6 +236,7 @@ export function DataTable<T>({
   paginate = true,
   page: pageProp,
   onPageChange,
+  // TD-011: UX defaults; apps may pass tenant UI settings.
   defaultPageSize = 10,
   pageSize: pageSizeProp,
   onPageSizeChange,
@@ -254,6 +260,7 @@ export function DataTable<T>({
   toolbar,
   exportFilename,
   exportLabel = "Export CSV",
+  onExport,
   mobileCard,
   rowProps,
   className,
@@ -367,8 +374,13 @@ export function DataTable<T>({
     resetPage();
   };
 
+  const runExport = async (filename: string) => {
+    const rows = processed;
+    if (onExport && (await onExport(rows, filename)) === false) return;
+    exportCsv(visibleColumns, rows, filename);
+  };
   const exportButton = exportFilename ? (
-    <Button variant="tertiary" size="small" iconBefore={<Download size={16} />} onClick={() => exportCsv(visibleColumns, processed, exportFilename)}>
+    <Button variant="tertiary" size="small" iconBefore={<Download size={16} />} onClick={() => void runExport(exportFilename)}>
       {exportLabel}
     </Button>
   ) : null;

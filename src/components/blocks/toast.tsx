@@ -147,6 +147,7 @@ const positionClass = {
 } as const;
 
 function ToastItem({ record }: { record: ToastRecord }) {
+  // TD-007: default auto-dismiss delay.
   const duration = record.duration ?? 5000;
   const paused = useRef(false);
   const remaining = useRef(duration);

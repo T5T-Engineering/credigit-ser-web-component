@@ -37,6 +37,7 @@ Not applicable (consumers enforce). The library holds no permission catalogue an
 |---|---|---|
 | NAV-FR-01 | `Navbar` — Top navigation with logo, links, actions, sticky / transparent modes and accessible mobile disclosure menu. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | NAV-FR-02 | `SideNav` — Grouped application sidebar on `xdark` surface with environment, user and badges. | [CONVENTIONS §5](../../CONVENTIONS.md) |
+| NAV-FR-09 | `SideNav` permission filtering — items take `permission?: string \| string[]` (any of); with a `can(permission)` prop, items the user may not use are not rendered and groups left empty are hidden. Without `can` every item renders (backward compatible). | Invariants 9 (navigable) and 12; identity-access API §5 (menus) |
 | NAV-FR-03 | `Breadcrumb` — Breadcrumb trail. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | NAV-FR-04 | `Pagination` — Page navigation with sibling range. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | NAV-FR-05 | `Tabs` — ARIA tabs (underline / pill). | [CONVENTIONS §5](../../CONVENTIONS.md) |

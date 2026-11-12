@@ -42,6 +42,7 @@ export function gaugeRatio(value: number, min = 0, max = 100): number {
 export function Gauge({
   value,
   min = 0,
+  // TD-010: apps pass the scale.
   max = 100,
   bands,
   label,

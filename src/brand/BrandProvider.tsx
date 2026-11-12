@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import {
   applyBrand,
-  BRAND_STORAGE_KEY,
+  brandStorageKey,
   clearBrand,
   defaultBrand,
   loadStoredBrand,
@@ -30,6 +30,12 @@ export type BrandProviderProps = {
   initialBrand?: BrandInput;
   /** Persist user changes in localStorage so they survive reloads. Default true. */
   persist?: boolean;
+  /**
+   * Active tenant. Scopes the stored brand to `credigit.brand.<tenantId>` so tenants sharing a browser
+   * never see each other's brand. Omit for the legacy shared key `credigit.brand`.
+   */
+  tenantId?: string | null;
+  /** Explicit localStorage key; wins over `tenantId`. */
   storageKey?: string;
 };
 
@@ -37,22 +43,26 @@ export type BrandProviderProps = {
  * Wrap the app once at the root. All components and the <Logo> read from it,
  * so a colour, logo or font change here restyles the whole product.
  */
-export function BrandProvider({ children, initialBrand, persist = true, storageKey = BRAND_STORAGE_KEY }: BrandProviderProps) {
+export function BrandProvider({ children, initialBrand, persist = true, tenantId, storageKey: storageKeyProp }: BrandProviderProps) {
+  const storageKey = storageKeyProp ?? brandStorageKey(tenantId);
   const base = useMemo(() => mergeBrand(defaultBrand, initialBrand), [initialBrand]);
   const [brand, setBrand] = useState<BrandConfig>(base);
-  const [hydrated, setHydrated] = useState(false);
+  // Key whose stored brand is currently in state. Null until the first load after mount; a tenant
+  // switch changes `storageKey` and must not write the previous tenant's brand under the new key.
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
 
-  // Load the stored brand after mount so server and client render the same markup first.
+  // Load the stored brand after mount (so server and client render the same markup first) and again
+  // whenever the key changes; a tenant with nothing stored falls back to the base brand.
   useEffect(() => {
     const stored = persist ? loadStoredBrand(storageKey) : null;
-    if (stored) setBrand(mergeBrand(base, stored));
-    setHydrated(true);
+    setBrand(stored ? mergeBrand(base, stored) : base);
+    setLoadedKey(storageKey);
   }, [base, persist, storageKey]);
 
   useEffect(() => {
     applyBrand(brand);
-    if (persist && hydrated) storeBrand(brand === base ? null : brand, storageKey);
-  }, [brand, base, persist, hydrated, storageKey]);
+    if (persist && loadedKey === storageKey) storeBrand(brand === base ? null : brand, storageKey);
+  }, [brand, base, persist, loadedKey, storageKey]);
 
   const updateBrand = useCallback((input: BrandInput) => setBrand((current) => mergeBrand(current, input)), []);
   const resetBrand = useCallback(() => {

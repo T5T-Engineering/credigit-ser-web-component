@@ -30,6 +30,7 @@ export function formatCountdown(seconds: number): string {
 /** "You'll be signed out in mm:ss" warning with Stay signed in / Sign out. Escape counts as "Stay signed in". */
 export function SessionTimeoutDialog({
   open,
+  // TD-001: fallback only; apps pass the session rule value.
   secondsRemaining = 120,
   expiresAt,
   onStaySignedIn,

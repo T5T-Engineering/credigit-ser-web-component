@@ -45,6 +45,7 @@ Not applicable (consumers enforce). The library holds no permission catalogue an
 | BRD-FR-06 | `Logo` — Variants horizontal / stacked / symbol / wordmark, tone auto / default / reverse; switches to tenant logos. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | BRD-FR-07 | `colors` — JS mirror of tokens for canvas / PDF / e-mail. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | BRD-FR-08 | `cx` — Class-name join helper. | [CONVENTIONS §5](../../CONVENTIONS.md) |
+| BRD-FR-10 | `BrandProvider tenantId` / `brandStorageKey(tenantId)` — Tenant-scoped persistence: with `tenantId` the stored brand lives under `credigit.brand.<tenantId>`, so tenants sharing a browser never see each other's brand. Without `tenantId` (and without `storageKey`) the key stays `credigit.brand` (backward compatible); an explicit `storageKey` wins over both. `brandBootScript(brandStorageKey(tenantId))` reads the same key before paint. | Invariant 2 (per-tenant brand), brand IMPLEMENTATION §10 gap |
 | BRD-FR-09 | `CSS tokens` — `@font-face` Baloo 2, brand scales, status colours, surface themes, density, Tailwind `@theme`. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 
 ## 4. Business rules and parameters
@@ -55,7 +56,7 @@ The library holds no business rules. The table lists component defaults and prop
 |---|---|---|---|
 | `defaultBrand` | Credigit default colours / logos / font | Ink #0F1E2E, Ember #E8401C, Slate #5B6878, Baloo 2 | Brand kit (`../brand-kit/`); hex values allowed only here and in `credigit.css`. |
 | Status colours | success / warning / danger / info | provisional | README › Open decisions #1. |
-| `BRAND_STORAGE_KEY` | localStorage key | `credigit.brand` | Library constant. |
+| `BRAND_STORAGE_KEY` | localStorage key prefix | `credigit.brand` (`credigit.brand.<tenantId>` with `tenantId`) | Library constant; tenant id comes from the app's session / tenant configuration. |
 | Google Fonts axes | Variable `wght@400..800`, static fallback 400–800 | fixed | CONVENTIONS §3. |
 
 ## 5. Workflows (Operations)

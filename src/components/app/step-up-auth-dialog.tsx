@@ -29,6 +29,7 @@ export type CodeInputProps = {
 
 /** One-time code / PIN entry as separate digit boxes; supports paste, Backspace and arrow keys. */
 export function CodeInput({
+  // TD-003: fallback only; apps pass Challenge.codeLength.
   length = 6,
   value,
   onChange,
@@ -163,11 +164,13 @@ export function StepUpAuthDialog({
   onVerified,
   onResend,
   method = "otp",
+  // TD-003: fallback only; apps pass Challenge.codeLength.
   length = 6,
   title = "Confirm it's you",
   description,
   summary,
   errorMessage = "That code is incorrect or has expired. Try again.",
+  // TD-002: fallback only; apps pass the identity configuration value.
   resendCooldown = 30,
   autoSubmit = true,
 }: StepUpAuthDialogProps) {

@@ -121,6 +121,7 @@ export function slaState(dueAt: Date | string | number, now: Date | number = Dat
 }
 
 /** Current time, refreshed every `intervalMs` (or the fixed `now` when given). */
+// TD-014: display refresh cadence.
 function useNow(now: Date | number | undefined, intervalMs = 30000): number {
   const [tick, setTick] = useState(() => Date.now());
   useEffect(() => {

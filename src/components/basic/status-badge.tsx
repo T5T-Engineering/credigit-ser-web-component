@@ -2,6 +2,7 @@ import { Badge, type BadgeProps } from "./badge";
 import type { Tone } from "./tone";
 
 /** Common credit-risk / lending status → tone mapping. Pass as `tones` to StatusBadge. */
+// TD-006: domain status map kept for compatibility; apps pass their configured `tones`.
 export const riskStatusTones: Record<string, Tone> = {
   PERFORMING: "success",
   WATCHLIST: "warning",

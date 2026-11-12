@@ -18,6 +18,7 @@ import { cx } from "../../utils/cx";
 import { BrandPresetPicker, type BrandPreset } from "./brand-preset-picker";
 
 /** Maximum logo upload size in bytes (512 KB). */
+// TD-015: logo limits should come from tenant configuration.
 export const LOGO_MAX_BYTES = 512 * 1024;
 /** Accepted logo MIME types. */
 export const LOGO_ACCEPTED_TYPES = ["image/svg+xml", "image/png", "image/webp"] as const;

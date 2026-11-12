@@ -54,6 +54,7 @@ Not applicable (consumers enforce). The library holds no permission catalogue an
 | BLK-FR-16 | `Steps / Timeline` — Vertical / horizontal progress steps. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | BLK-FR-17 | `CtaBand` — Call-to-action band. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | BLK-FR-18 | `Toaster` — Auto-dismissing toasts in an `aria-live="polite"` region. | [CONVENTIONS §5](../../CONVENTIONS.md) |
+| BLK-FR-19 | `ConfirmDialog` — Confirmation modal for consequential commands (lock / unlock a user, reset MFA, deactivate, revoke): title, description, `tone` (`danger` uses the danger button), optional reason field (`reason: "required" \| "optional"`, `minReasonLength`), async `onConfirm(reason)` with busy state; returning `false` or rejecting keeps it open and shows an error. The backend IAM commands take a `reason` that is shown to approvers and kept in the audit log. | identity-access API §4 (`{ reason }` bodies); invariant 9 (audited) |
 
 ## 4. Business rules and parameters
 

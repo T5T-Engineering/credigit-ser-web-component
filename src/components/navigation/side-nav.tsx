@@ -5,7 +5,14 @@ import { Avatar } from "../basic";
 import { cx } from "../../utils/cx";
 
 /** A link in the side navigation. */
-export type SideNavItem = { href: string; label: string; icon?: ReactNode; badge?: string | number };
+export type SideNavItem = {
+  href: string;
+  label: string;
+  icon?: ReactNode;
+  badge?: string | number;
+  /** Permission key(s) needed to see the item (any of). Checked with the `can` prop. */
+  permission?: string | readonly string[];
+};
 /** A labelled group of side navigation links. */
 export type SideNavGroup = { label: string; items: SideNavItem[] };
 /** Signed-in user shown at the bottom of the side navigation. */
@@ -28,7 +35,23 @@ export type SideNavProps = Omit<ComponentProps<"aside">, "children"> & {
   navLabel?: string;
   /** Custom active matcher. Default: exact for "/", prefix match otherwise. */
   isActive?: (href: string, activeHref: string) => boolean;
+  /**
+   * Permission check (e.g. from `usePermissions().has`). Items with a `permission` the user lacks are not
+   * rendered and empty groups are hidden. Without it every item renders. UI only; routes must also be guarded.
+   */
+  can?: (permission: string) => boolean;
 };
+
+/** Groups with the items the user may see (items without `permission` always stay). */
+export function filterSideNavGroups(groups: SideNavGroup[], can?: (permission: string) => boolean): SideNavGroup[] {
+  if (!can) return groups;
+  const visible = (item: SideNavItem) => {
+    if (item.permission === undefined) return true;
+    const keys: readonly string[] = typeof item.permission === "string" ? [item.permission] : item.permission;
+    return keys.some((k) => can(k));
+  };
+  return groups.map((g) => ({ ...g, items: g.items.filter(visible) })).filter((g) => g.items.length > 0);
+}
 
 function defaultIsActive(href: string, activeHref: string): boolean {
   if (href === "/") return activeHref === "/";
@@ -47,6 +70,7 @@ export function SideNav({
   collapsed = false,
   navLabel = "Main",
   isActive = defaultIsActive,
+  can,
   className,
   ...props
 }: SideNavProps) {
@@ -78,7 +102,7 @@ export function SideNav({
       ) : null}
 
       <nav aria-label={navLabel} className="-mx-1 mt-6 flex-1 space-y-6 overflow-y-auto px-1">
-        {groups.map((group) => (
+        {filterSideNavGroups(groups, can).map((group) => (
           <div key={group.label}>
             <p className={cx("font-mono text-[10px] uppercase tracking-[0.14em] text-fg-subtle", collapsed ? "sr-only" : "px-3")}>
               {group.label}

@@ -4,7 +4,7 @@
 |---|---|
 | Status | Built |
 | Requirements | [REQUIREMENTS.md](REQUIREMENTS.md) |
-| Last updated | 2026-11-12 (commit d545831) |
+| Last updated | 2026-11-12 (feature/wc-iam) |
 
 ## 1. Design overview
 
@@ -35,6 +35,7 @@ React 19 function components, TypeScript strict, Tailwind 4 token utilities, luc
 | `src/components/blocks/steps.tsx` | Steps / Timeline |
 | `src/components/blocks/cta-band.tsx` | CtaBand |
 | `src/components/blocks/toast.tsx` | Toaster |
+| `src/components/blocks/confirm-dialog.tsx` | ConfirmDialog |
 
 ## 3. Public API (exported components and helpers)
 
@@ -58,6 +59,7 @@ React 19 function components, TypeScript strict, Tailwind 4 token utilities, luc
 | `Steps / Timeline` | `src/components/blocks/steps.tsx` | Vertical / horizontal progress steps. |
 | `CtaBand` | `src/components/blocks/cta-band.tsx` | Call-to-action band. |
 | `Toaster`, `useToast` | `src/components/blocks/toast.tsx` | Auto-dismissing toasts in an `aria-live="polite"` region. |
+| `ConfirmDialog` | `src/components/blocks/confirm-dialog.tsx` | Confirmation modal with optional (required) reason and async confirm. Built on `Modal`. |
 
 Full prop signatures: [CONVENTIONS §5](../../CONVENTIONS.md).
 
@@ -83,7 +85,7 @@ Not applicable (REQUIREMENTS §5–7). UI callbacks are the integration surface 
 
 ## 8. Tests
 
-Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for this doc change.
+Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`).
 
 | Test file | Covers |
 |---|---|
@@ -93,6 +95,7 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 | `src/components/blocks/accordion.test.tsx` | `Accordion` |
 | `src/components/blocks/modal.test.tsx` | `Modal`, `Drawer` |
 | `src/components/blocks/toast.test.tsx` | `Toaster` |
+| `src/components/blocks/confirm-dialog.test.tsx` | `ConfirmDialog` |
 
 ## 9. Requirements traceability
 
@@ -116,12 +119,17 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 | BLK-FR-16 | `src/components/blocks/steps.tsx` | — | Done (no test) |
 | BLK-FR-17 | `src/components/blocks/cta-band.tsx` | — | Done (no test) |
 | BLK-FR-18 | `src/components/blocks/toast.tsx` | `toast.test.tsx` | Done |
+| BLK-FR-19 | `src/components/blocks/confirm-dialog.tsx` | `confirm-dialog.test.tsx` | Done |
 
 ## 10. Gaps against the invariants
 
-- Invariant 8: no `TECH-DEBT.md` exists in this repo, so the literal defaults listed in §5 are not registered as exceptions with IDs.
+- Invariant 8: the literal defaults listed in §5 are registered as exceptions in [TECH-DEBT.md](../../../TECH-DEBT.md) (ids in §11 and next to each literal in the code).
 - Invariant 12: permission checks are out of scope for a library; apps must gate every action that these components render.
 
 ## 11. Tech debt
 
-No `TECH-DEBT.md` in this repo, so no TD ids exist. Items in §10 are candidates.
+Registered in [TECH-DEBT.md](../../../TECH-DEBT.md):
+
+| ID | Item | Status |
+|---|---|---|
+| TD-007 | Toast auto-dismiss defaults to 5000 ms | Open |

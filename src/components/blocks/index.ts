@@ -17,3 +17,4 @@ export * from "./empty-state";
 export * from "./steps";
 export * from "./cta-band";
 export * from "./toast";
+export * from "./confirm-dialog";

@@ -103,9 +103,15 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 
 - `RuleCard` / `SubscriptionList` actions are slots/handlers; permission gating (view vs edit rule, toggle subscription) and second-person confirmation are the app's responsibility.
 - `ChipInput`, `RoleMultiSelect`, `RuleCard` have no dedicated tests.
-- Invariant 8: no `TECH-DEBT.md` exists in this repo, so the literal defaults listed in §5 are not registered as exceptions with IDs.
+- Invariant 8: the literal defaults listed in §5 are registered as exceptions in [TECH-DEBT.md](../../../TECH-DEBT.md) (ids in §11 and next to each literal in the code).
 - Invariant 12: permission checks are out of scope for a library; apps must gate every action that these components render.
 
 ## 11. Tech debt
 
-No `TECH-DEBT.md` in this repo, so no TD ids exist. Items in §10 are candidates.
+Registered in [TECH-DEBT.md](../../../TECH-DEBT.md):
+
+| ID | Item | Status |
+|---|---|---|
+| TD-013 | `RuleValueInput` / `formatRuleValue` default currency `NGN` (₦) and locale `en-NG` | Open |
+| TD-014 | `WorkflowInstanceCard` clock ticks every 30 s | Open |
+| TD-019 | Components without dedicated tests: `Logo`, `tokens.ts`, `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `DocumentList`, `TenantSwitcher`, `ActivityFeed` / `AuditTrail`, `ChipInput`, `RoleMultiSelect`, `RuleCard` | Open |

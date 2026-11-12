@@ -4,7 +4,7 @@
 |---|---|
 | Status | Built |
 | Requirements | [REQUIREMENTS.md](REQUIREMENTS.md) |
-| Last updated | 2026-11-12 (commit d545831) |
+| Last updated | 2026-11-12 (feature/wc-iam) |
 
 ## 1. Design overview
 
@@ -35,6 +35,8 @@ React 19 function components, TypeScript strict, Tailwind 4 token utilities, luc
 | `src/components/app/permission-gate.tsx` | PermissionGate |
 | `src/components/app/auth-card.tsx` | AuthCard |
 | `src/components/app/otp-verification.tsx` | AuthCard |
+| `src/components/app/permission-context.tsx` | PermissionProvider, usePermissions, useCan, Can, checkPermissions |
+| `src/components/app/permission-matrix.tsx` | PermissionMatrix, diffGrants, diffRoleGrants, filterPermissions |
 | `src/components/app/app-utils.ts` | App helpers |
 | `src/components/app/test-utils.ts` | App helpers |
 
@@ -55,19 +57,21 @@ React 19 function components, TypeScript strict, Tailwind 4 token utilities, luc
 | `FileCard`, `DocumentList`, `documentStatusMeta` | `src/components/app/document-list.tsx` | Document rows with status (incl. OCR processing) and per-handler actions. |
 | `ChecklistPanel`, `checklistSummary`, `checklistStatusMeta` | `src/components/app/checklist-panel.tsx` | Conditions-precedent checklist with progress. |
 | `PhaseBadge`, `ModuleHeader` | `src/components/app/module-header.tsx` | Module page header with phase badge and pill sub-navigation. |
-| `SignInCard`, `MicrosoftSignInButton`, `MicrosoftLogo` | `src/components/app/sign-in-card.tsx` | Sign-in card with Microsoft button (Microsoft brand colours — documented exception). |
+| `SignInCard`, `MicrosoftSignInButton`, `MicrosoftLogo` | `src/components/app/sign-in-card.tsx` | Sign-in card with Microsoft button (Microsoft brand colours — documented exception, TD-005); `microsoft={false}` for local mode. |
 | `RolePicker` | `src/components/app/role-picker.tsx` | Searchable / collapsible role selection (demo access). |
 | `TenantSwitcher`, `environmentTone`, `defaultEnvironmentTones` | `src/components/app/tenant-switcher.tsx` | Tenant / environment switcher. |
 | `SessionTimeoutDialog`, `formatCountdown` | `src/components/app/session-timeout-dialog.tsx` | Countdown dialog with stay / sign-out and live announcements. |
 | `PermissionGate` | `src/components/app/permission-gate.tsx` | Renders children when `allowed`, else lock fallback (UI only; server enforces). |
 | `AuthCard`, `OtpVerification` | `src/components/app/auth-card.tsx` | Auth screen frame and inline OTP entry. |
+| `PermissionProvider`, `usePermissions`, `useCan`, `Can`, `checkPermissions` | `src/components/app/permission-context.tsx` | Permission gate over an app-supplied `has()` / key list; fails closed. |
+| `PermissionMatrix`, `diffGrants`, `diffRoleGrants`, `filterPermissions` | `src/components/app/permission-matrix.tsx` | Roles × permissions grid grouped by module with search, tri-state module toggles, locked / grants-all roles, change tracking. |
 | `App helpers` | `src/components/app/app-utils.ts` | Shared internals. |
 
 Full prop signatures: [CONVENTIONS §5](../../CONVENTIONS.md).
 
 ## 4. Data model
 
-No persisted data. Prop types only (see §3 and CONVENTIONS §5).
+No persisted data. Prop types only (see §3 and CONVENTIONS §5). IAM shapes: `PermissionDefinition` (`{ key, label, description?, module, group?, sensitive?, level? }` — a subset of the backend `Permission`), `PermissionMatrixRole` (`{ id, label, description?, grantsAll?, readOnly? }`), `PermissionGrants` (`Record<roleId, permissionKey[]>`), `GrantDiff` (`{ grant[], revoke[] }`).
 
 ## 5. Rule keys used
 
@@ -83,7 +87,7 @@ No Rules & Parameters Engine keys are read by the library. Literal defaults pres
 
 ## 6. Permission keys enforced
 
-None (consumers enforce). `PermissionGate` (`src/components/app/permission-gate.tsx`) renders on an app-resolved `allowed` flag.
+None (consumers enforce). `PermissionGate` renders on an app-resolved `allowed` flag; `Can` evaluates the keys the app passes (e.g. `identity.roles.change-permissions`) against the app's `has()` — the library ships no permission keys.
 
 ## 7. Workflows, notifications, events, hooks wired
 
@@ -91,7 +95,7 @@ Not applicable (REQUIREMENTS §5–7). UI callbacks are the integration surface 
 
 ## 8. Tests
 
-Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for this doc change.
+Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`).
 
 | Test file | Covers |
 |---|---|
@@ -104,6 +108,10 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 | `src/components/app/checklist-panel.test.tsx` | `ChecklistPanel` |
 | `src/components/app/auth.test.tsx` | `RolePicker`, `AuthCard` |
 | `src/components/app/permission-gate.test.tsx` | `PermissionGate` |
+| `src/components/app/permission-context.test.tsx` | `PermissionProvider`, `Can`, `useCan`, `checkPermissions` |
+| `src/components/app/permission-matrix.test.tsx` | `PermissionMatrix`, `diffGrants`, `diffRoleGrants`, `filterPermissions` |
+| `src/components/app/sign-in-card.test.tsx` | `SignInCard`, `MicrosoftSignInButton` |
+| `src/components/app/session-timeout-dialog.test.tsx` | `SessionTimeoutDialog`, `formatCountdown` |
 
 ## 9. Requirements traceability
 
@@ -122,22 +130,35 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 | APP-FR-11 | `src/components/app/document-list.tsx` | — | Done (no test) |
 | APP-FR-12 | `src/components/app/checklist-panel.tsx` | `checklist-panel.test.tsx` | Done |
 | APP-FR-13 | `src/components/app/module-header.tsx` | — | Done (no test) |
-| APP-FR-14 | `src/components/app/sign-in-card.tsx` | — | Done (no test) |
+| APP-FR-14 | `src/components/app/sign-in-card.tsx` | `sign-in-card.test.tsx` | Done |
 | APP-FR-15 | `src/components/app/role-picker.tsx` | `auth.test.tsx` | Done |
 | APP-FR-16 | `src/components/app/tenant-switcher.tsx` | — | Done (no test) |
-| APP-FR-17 | `src/components/app/session-timeout-dialog.tsx` | — | Done (no test) |
+| APP-FR-17 | `src/components/app/session-timeout-dialog.tsx` | `session-timeout-dialog.test.tsx` | Done |
 | APP-FR-18 | `src/components/app/permission-gate.tsx` | `permission-gate.test.tsx` | Done |
 | APP-FR-19 | `src/components/app/auth-card.tsx` | `auth.test.tsx` | Done |
 | APP-FR-20 | `src/components/app/app-utils.ts` | — | Done (no test) |
+| APP-FR-21 | `src/components/app/permission-context.tsx` | `permission-context.test.tsx` | Done |
+| APP-FR-22 | `src/components/app/permission-matrix.tsx` | `permission-matrix.test.tsx` | Done |
+| APP-FR-23 | — | `sign-in-card.test.tsx`, `session-timeout-dialog.test.tsx` | Done |
 
 ## 10. Gaps against the invariants
 
-- Session (120 s) and OTP (30 s, 6 digits) defaults are literals; must be supplied from rules (invariant 8) and registered in a TECH-DEBT file.
-- `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `DocumentList`, `TenantSwitcher`, `SessionTimeoutDialog`, `SignInCard` have no tests.
-- Permission-aware support is limited to `PermissionGate` (boolean `allowed`) and `disabled` props; `DocumentList` actions and `UserMenu` items rely on the app omitting handlers.
-- Invariant 8: no `TECH-DEBT.md` exists in this repo, so the literal defaults listed in §5 are not registered as exceptions with IDs.
+- Session (120 s) and OTP (30 s, 6 digits) defaults are literals; registered as TD-001 – TD-003. Apps pass the rule / backend values.
+- `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `DocumentList`, `TenantSwitcher` have no tests (TD-019).
+- Permission-aware support: `Can` / `useCan` (app-supplied `has`), `PermissionGate`, `disabled` props; `DocumentList` actions and `UserMenu` items still rely on the app omitting handlers (TD-022).
+- Invariant 8: the literal defaults listed in §5 are registered as exceptions in [TECH-DEBT.md](../../../TECH-DEBT.md) (ids in §11 and next to each literal in the code).
 - Invariant 12: permission checks are out of scope for a library; apps must gate every action that these components render.
 
 ## 11. Tech debt
 
-No `TECH-DEBT.md` in this repo, so no TD ids exist. Items in §10 are candidates.
+Registered in [TECH-DEBT.md](../../../TECH-DEBT.md):
+
+| ID | Item | Status |
+|---|---|---|
+| TD-001 | `SessionTimeoutDialog.secondsRemaining` defaults to 120 s | Open |
+| TD-002 | OTP resend cooldown defaults to 30 s (`StepUpAuthDialog.resendCooldown`, `OtpVerification.resendCooldown`) | Open |
+| TD-003 | One-time code length defaults to 6 (`StepUpAuthDialog.length`, `CodeInput.length`, `OtpVerification.length`) | Open |
+| TD-004 | `DecisionPanel.commentRequired` defaults to `true` (comment required for every decision) | Open |
+| TD-005 | Microsoft sign-in button uses Microsoft's own hex colours | Accepted |
+| TD-019 | Components without dedicated tests: `Logo`, `tokens.ts`, `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `DocumentList`, `TenantSwitcher`, `ActivityFeed` / `AuditTrail`, `ChipInput`, `RoleMultiSelect`, `RuleCard` | Open |
+| TD-022 | `UserMenu` items and `DocumentList` actions are permission-aware only by the app omitting handlers | Open |

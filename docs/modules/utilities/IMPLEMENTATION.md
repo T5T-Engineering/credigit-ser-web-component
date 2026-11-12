@@ -94,9 +94,15 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 
 - `BrandSettingsPanel` applies changes locally (`updateBrand` + localStorage) with no `onSave` / before-change hook, so audit, System Admin permission and second-person confirmation (PRD §10.4) must be added by the app around it.
 - Logo size / type limits are literals (invariant 8) with no TECH-DEBT ID.
-- Invariant 8: no `TECH-DEBT.md` exists in this repo, so the literal defaults listed in §5 are not registered as exceptions with IDs.
+- Invariant 8: the literal defaults listed in §5 are registered as exceptions in [TECH-DEBT.md](../../../TECH-DEBT.md) (ids in §11 and next to each literal in the code).
 - Invariant 12: permission checks are out of scope for a library; apps must gate every action that these components render.
 
 ## 11. Tech debt
 
-No `TECH-DEBT.md` in this repo, so no TD ids exist. Items in §10 are candidates.
+Registered in [TECH-DEBT.md](../../../TECH-DEBT.md):
+
+| ID | Item | Status |
+|---|---|---|
+| TD-015 | Logo upload limits: `LOGO_MAX_BYTES` = 512 KB, `LOGO_ACCEPTED_TYPES` = SVG/PNG/WebP | Open |
+| TD-016 | Contrast warning threshold 4.5:1 | Accepted |
+| TD-017 | `BrandSettingsPanel` applies changes locally with no `onSave` / before-change hook | Open |

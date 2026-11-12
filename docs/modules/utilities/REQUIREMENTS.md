@@ -52,7 +52,7 @@ The library holds no business rules. The table lists component defaults and prop
 
 | Rule key / prop | Meaning | Default | Source |
 |---|---|---|---|
-| `LOGO_MAX_BYTES` | Logo upload limit | 512 KB | Literal in `brand-settings-panel.tsx` — no TECH-DEBT entry (invariant 8). |
+| `LOGO_MAX_BYTES` | Logo upload limit | 512 KB | Literal in `brand-settings-panel.tsx` — registered as TD-015 in `TECH-DEBT.md` (invariant 8). |
 | Accepted logo types | SVG / PNG / WebP | fixed | Literal in `brand-settings-panel.tsx`. |
 | Contrast warning threshold | Accent vs white | 4.5:1 | WCAG 2.2 AA (not a business rule). |
 

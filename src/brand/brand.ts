@@ -106,7 +106,18 @@ export const defaultBrand: BrandConfig = {
   font: { family: "Baloo 2", source: "bundled" },
 };
 
+// Legacy shared key; use brandStorageKey(tenantId) for tenant isolation (TD-009, closed).
 export const BRAND_STORAGE_KEY = "credigit.brand";
+
+/**
+ * localStorage key for a tenant's stored brand: `credigit.brand.<tenantId>`. Without a tenant id
+ * (undefined, null or blank) it returns `BRAND_STORAGE_KEY`, the shared key used before tenant scoping.
+ * Pass the same value to `BrandProvider tenantId` and `brandBootScript(brandStorageKey(tenantId))`.
+ */
+export function brandStorageKey(tenantId?: string | null): string {
+  const id = tenantId?.trim();
+  return id ? `${BRAND_STORAGE_KEY}.${id}` : BRAND_STORAGE_KEY;
+}
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 
@@ -280,7 +291,8 @@ export function brandBootScript(key = BRAND_STORAGE_KEY): string {
   const axes: Record<string, string> = {};
   for (const o of fontOptions) if (o.axis) axes[o.family.toLowerCase()] = o.axis;
   const bundled = bundledFontFamilies.map((f) => f.toLowerCase());
-  const j = JSON.stringify;
+  // JSON plus "<" escaped, so an app-supplied key (e.g. a tenant id) can never close the inline <script>.
+  const j = (value: unknown) => JSON.stringify(value).replace(/</g, "\\u003c");
   return (
     `(function(){try{var b=JSON.parse(localStorage.getItem(${j(key)})||"null");if(!b)return;` +
     `var d=document,s=d.documentElement.style,h=/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i,c=b.colors||{};` +

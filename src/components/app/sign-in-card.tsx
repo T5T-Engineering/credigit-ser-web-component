@@ -11,6 +11,7 @@ import { cx } from "../../utils/cx";
  * These are the only hard-coded colours in the library and are deliberately exempt from the
  * theme-token rule (third-party trademark requirement).
  */
+// TD-005: Microsoft brand colours (accepted exception, see TECH-DEBT.md).
 const MS = {
   red: "#F25022",
   green: "#7FBA00",
@@ -116,6 +117,11 @@ export type SignInCardProps = Omit<ComponentProps<"div">, "title"> & {
   error?: ReactNode;
   /** Microsoft button theme. Default `light`. */
   microsoftTheme?: "light" | "dark";
+  /**
+   * Show the Microsoft (Entra ID) button. Default true. Pass `false` in local sign-in mode (`/auth/config`
+   * `mode: "Local"`): `children` (e.g. the e-mail + password form) then render without a divider.
+   */
+  microsoft?: boolean;
   /** Divider text above `children`. Default "or". Pass `null` to hide the divider. */
   dividerLabel?: ReactNode;
   /** Secondary area (e.g. demo access / RolePicker). */
@@ -134,6 +140,7 @@ export function SignInCard({
   loading,
   error,
   microsoftTheme = "light",
+  microsoft = true,
   dividerLabel = "or",
   children,
   footer,
@@ -147,17 +154,17 @@ export function SignInCard({
         {productName ? <h1 className="font-display text-[1.75rem] leading-[1.15] font-bold tracking-[-0.015em] text-balance text-fg">{productName}</h1> : null}
         {tagline ? <p className="text-base leading-6 text-pretty text-fg-muted">{tagline}</p> : null}
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 empty:hidden">
         {error ? (
           <p role="alert" className="squircle rounded-2xl bg-danger-soft px-4 py-3 text-sm font-medium text-danger-strong">
             {error}
           </p>
         ) : null}
-        <MicrosoftSignInButton theme={microsoftTheme} onClick={onMicrosoftSignIn} href={microsoftHref} loading={loading} fullWidth />
+        {microsoft ? <MicrosoftSignInButton theme={microsoftTheme} onClick={onMicrosoftSignIn} href={microsoftHref} loading={loading} fullWidth /> : null}
       </div>
       {children ? (
         <>
-          {dividerLabel !== null ? (
+          {microsoft && dividerLabel !== null ? (
             <div className="flex items-center gap-3" role="separator" aria-label={typeof dividerLabel === "string" ? dividerLabel : undefined}>
               <span aria-hidden="true" className="h-px flex-1 bg-line" />
               <span aria-hidden="true" className="font-mono text-xs font-medium tracking-[0.08em] text-fg-muted uppercase">

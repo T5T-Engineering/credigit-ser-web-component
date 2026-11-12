@@ -10,6 +10,7 @@ export type PasswordRule = { id: string; label: string; test: (value: string) =>
  * Default rules. Password policy is a tenant setting — pass your own `rules` to change it.
  * These defaults follow common enterprise guidance (length first, mixed character classes).
  */
+// TD-012: fallback policy; apps build rules from the tenant password policy (/auth/config).
 export const defaultPasswordRules: PasswordRule[] = [
   { id: "length", label: "At least 12 characters", test: (v) => v.length >= 12 },
   { id: "upper", label: "An uppercase letter", test: (v) => /[A-Z]/.test(v) },
