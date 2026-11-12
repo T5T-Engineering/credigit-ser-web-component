@@ -85,6 +85,11 @@ type Shared = {
   labels?: Partial<RuleDisplayLabels>;
   /** Link component for `sourceHref` / pending `href` (router Link). */
   linkComponent?: ElementType;
+  /**
+   * Show the technical rule key (mono, copyable) under the label. Default `true`; business-facing lists pass `false` and show
+   * the key only where an administrator needs it (e.g. a details drawer).
+   */
+  showKey?: boolean;
 };
 
 function valuesEqual(a: RuleValue | undefined, b: RuleValue | undefined): boolean {
@@ -148,7 +153,7 @@ export type RuleCardProps = Omit<ComponentProps<"article">, "children"> &
  * Card for one business rule: label, copyable mono key, description, formatted current value, default,
  * scope badge, source / PRD reference, "Awaiting approval" badge with the proposed value, last change and actions.
  */
-export function RuleCard({ rule, actions, formatOptions, labels, linkComponent, className, children, ...props }: RuleCardProps) {
+export function RuleCard({ rule, actions, formatOptions, labels, linkComponent, showKey = true, className, children, ...props }: RuleCardProps) {
   const { l, current, hasDefault, defaultText, modified, pending, proposed, scope } = useRuleParts({ rule, formatOptions, labels });
   const Link = linkComponent ?? "a";
   return (
@@ -168,7 +173,7 @@ export function RuleCard({ rule, actions, formatOptions, labels, linkComponent, 
               </Badge>
             ) : null}
           </div>
-          <Key value={rule.key} label={l.copyKey} />
+          {showKey ? <Key value={rule.key} label={l.copyKey} /> : null}
         </div>
         {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
       </header>
@@ -237,7 +242,7 @@ export type RuleRowProps = Omit<ComponentProps<"div">, "children"> & Shared;
  * Compact row for a rules list / registry table: label + key + description on the left, value and
  * default in the middle, badges, last change and actions on the right. Stacks on phones.
  */
-export function RuleRow({ rule, actions, formatOptions, labels, linkComponent, className, ...props }: RuleRowProps) {
+export function RuleRow({ rule, actions, formatOptions, labels, linkComponent, showKey = true, className, ...props }: RuleRowProps) {
   const { l, current, hasDefault, defaultText, modified, pending, proposed, scope } = useRuleParts({ rule, formatOptions, labels });
   return (
     <div
@@ -258,7 +263,7 @@ export function RuleRow({ rule, actions, formatOptions, labels, linkComponent, c
             </Badge>
           ) : null}
         </div>
-        <Key value={rule.key} label={l.copyKey} />
+        {showKey ? <Key value={rule.key} label={l.copyKey} /> : null}
         {rule.description ? <p className="text-sm leading-5 text-fg-muted">{rule.description}</p> : null}
         <div className="flex flex-wrap items-center gap-x-3">
           <SourceRef rule={rule} label={l.source} linkComponent={linkComponent} />
