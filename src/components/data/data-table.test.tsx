@@ -235,4 +235,19 @@ describe("CSV helpers", () => {
     expect(text).not.toContain("Adamu");
     click.mockRestore();
   });
+
+  it("onExport receives the exported rows and can cancel the download", async () => {
+    const user = userEvent.setup();
+    const create = vi.fn((_blob: Blob) => "blob:x");
+    Object.assign(URL, { createObjectURL: create, revokeObjectURL: vi.fn() });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    const onExport = vi.fn<(rows: Loan[], filename: string) => Promise<boolean>>().mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    render(<DataTable label="Loans" exportFilename="loans" onExport={onExport} columns={columns} data={loans} getRowId={(r) => r.id} />);
+    await user.click(screen.getByRole("button", { name: "Export CSV" }));
+    expect(onExport).toHaveBeenCalledWith(loans, "loans");
+    expect(create).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Export CSV" }));
+    await vi.waitFor(() => expect(create).toHaveBeenCalledTimes(1));
+    click.mockRestore();
+  });
 });

@@ -103,9 +103,13 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 ## 10. Gaps against the invariants
 
 - `riskStatusTones` embeds a domain status list in the library (overridable through `tones`); consumers should pass their configured map.
-- Invariant 8: no `TECH-DEBT.md` exists in this repo, so the literal defaults listed in §5 are not registered as exceptions with IDs.
+- Invariant 8: the literal defaults listed in §5 are registered as exceptions in [TECH-DEBT.md](../../../TECH-DEBT.md) (ids in §11 and next to each literal in the code).
 - Invariant 12: permission checks are out of scope for a library; apps must gate every action that these components render.
 
 ## 11. Tech debt
 
-No `TECH-DEBT.md` in this repo, so no TD ids exist. Items in §10 are candidates.
+Registered in [TECH-DEBT.md](../../../TECH-DEBT.md):
+
+| ID | Item | Status |
+|---|---|---|
+| TD-006 | `riskStatusTones` embeds a domain status → tone map | Open |

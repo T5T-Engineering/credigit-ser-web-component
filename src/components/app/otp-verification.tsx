@@ -30,9 +30,11 @@ export type OtpVerificationProps = Omit<ComponentProps<"div">, "onSubmit"> & {
 /** Inline one-time-code verification: digit boxes, verify button, resend with cooldown, error state. */
 export function OtpVerification({
   destination,
+  // TD-003: fallback only; apps pass Challenge.codeLength.
   length = 6,
   onVerify,
   onResend,
+  // TD-002: fallback only; apps pass the identity configuration value.
   resendCooldown = 30,
   errorMessage = "That code isn't right or has expired. Check it and try again.",
   hint,

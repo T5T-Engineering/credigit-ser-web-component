@@ -214,6 +214,7 @@ const durationUnitLabel: Record<DurationUnit, [string, string]> = {
 
 /** Human-readable text for a rule value (₦ amounts, percents, durations, labels for enum / roles). */
 export function formatRuleValue(type: RuleValueType, value: RuleValue | undefined, options: FormatRuleValueOptions = {}): string {
+  // TD-013: tenant base currency / locale should be passed in.
   const { currency = "NGN", unit, locale = "en-NG", emptyText = "—", booleanLabels = { on: "On", off: "Off" } } = options;
   if (value === null || value === undefined || value === "" || (Array.isArray(value) && value.length === 0)) return emptyText;
   const nf = (n: number, digits = 2) => new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(n);
@@ -311,6 +312,7 @@ export function RuleValueInput({
   step,
   unit,
   options,
+  // TD-013: tenant base currency should be passed in.
   currency = "NGN",
   currencySymbol,
   durationUnits = allDurationUnits,

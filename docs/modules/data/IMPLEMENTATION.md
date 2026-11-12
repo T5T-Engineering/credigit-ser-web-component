@@ -4,7 +4,7 @@
 |---|---|
 | Status | Built |
 | Requirements | [REQUIREMENTS.md](REQUIREMENTS.md) |
-| Last updated | 2026-11-12 (commit d545831) |
+| Last updated | 2026-11-12 (feature/wc-iam) |
 
 ## 1. Design overview
 
@@ -64,7 +64,7 @@ Not applicable (REQUIREMENTS §5–7). UI callbacks are the integration surface 
 
 ## 8. Tests
 
-Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for this doc change.
+Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`).
 
 | Test file | Covers |
 |---|---|
@@ -80,6 +80,7 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 |---|---|---|---|
 | DAT-FR-01 | `src/components/data/data-table.tsx` | `data-table.test.tsx` | Done |
 | DAT-FR-02 | `src/components/data/csv.ts` | `data-table.test.tsx` | Done |
+| DAT-FR-10 | `src/components/data/data-table.tsx` | `data-table.test.tsx` | Done |
 | DAT-FR-03 | `src/components/data/filter-bar.tsx` | `filter-bar.test.tsx` | Done |
 | DAT-FR-04 | `src/components/data/description-list.tsx` | `data-display.test.tsx` | Done |
 | DAT-FR-05 | `src/components/data/matrix.tsx` | `matrix.test.tsx` | Done |
@@ -90,11 +91,16 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 
 ## 10. Gaps against the invariants
 
-- `DataTable` CSV export has no hook to record an audit entry or check an export permission; apps must wrap it (`exportFilename` / `toolbar`) — consider an `onExport` callback.
+- `DataTable` CSV export: `onExport` lets apps veto (permission) and audit each export; apps should hide the button (omit `exportFilename`) when the export permission is not held.
 - `ActivityFeed` / `AuditTrail` have no test file.
-- Invariant 8: no `TECH-DEBT.md` exists in this repo, so the literal defaults listed in §5 are not registered as exceptions with IDs.
+- Invariant 8: the literal defaults listed in §5 are registered as exceptions in [TECH-DEBT.md](../../../TECH-DEBT.md) (ids in §11 and next to each literal in the code).
 - Invariant 12: permission checks are out of scope for a library; apps must gate every action that these components render.
 
 ## 11. Tech debt
 
-No `TECH-DEBT.md` in this repo, so no TD ids exist. Items in §10 are candidates.
+Registered in [TECH-DEBT.md](../../../TECH-DEBT.md):
+
+| ID | Item | Status |
+|---|---|---|
+| TD-011 | `DataTable.defaultPageSize` = 10, `pageSizeOptions` = 10/25/50/100 | Open |
+| TD-019 | Components without dedicated tests: `Logo`, `tokens.ts`, `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `DocumentList`, `TenantSwitcher`, `ActivityFeed` / `AuditTrail`, `ChipInput`, `RoleMultiSelect`, `RuleCard` | Open |

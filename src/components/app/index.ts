@@ -18,3 +18,5 @@ export * from "./session-timeout-dialog";
 export * from "./permission-gate";
 export * from "./auth-card";
 export * from "./otp-verification";
+export * from "./permission-context";
+export * from "./permission-matrix";

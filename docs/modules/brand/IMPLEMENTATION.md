@@ -4,7 +4,7 @@
 |---|---|
 | Status | Built |
 | Requirements | [REQUIREMENTS.md](REQUIREMENTS.md) |
-| Last updated | 2026-11-12 (commit d545831) |
+| Last updated | 2026-11-12 (feature/wc-iam) |
 
 ## 1. Design overview
 
@@ -26,10 +26,10 @@
 
 | Export | File | Notes |
 |---|---|---|
-| `BrandProvider`, `useBrand` | `src/brand/BrandProvider.tsx` | Context with `brand`, `updateBrand`, `resetBrand`; `initialBrand`, `persist`, `storageKey`. |
+| `BrandProvider`, `useBrand` | `src/brand/BrandProvider.tsx` | Context with `brand`, `updateBrand`, `resetBrand`; `initialBrand`, `persist`, `tenantId` (tenant-scoped key), `storageKey` (explicit key, wins). |
 | `mergeBrand`, `brandToCssVars`, `applyBrand`, `clearBrand`, `applyFont`, `normalizeFont`, `findFontOption`, `googleFontHref`, `googleFontAxes` | `src/brand/brand.ts` | Merge + validate input, write CSS variables, manage one Google Fonts `<link>` + preconnect. |
 | `isHexColor`, `isSafeFontFamily`, `FONT_FAMILY_PATTERN`, `FONT_FAMILY_MAX_LENGTH` | `src/brand/brand.ts` | Input validation (no CSS / URL injection). |
-| `loadStoredBrand`, `storeBrand`, `brandBootScript`, `BRAND_STORAGE_KEY` | `src/brand/brand.ts` | localStorage persistence and pre-paint script. |
+| `loadStoredBrand`, `storeBrand`, `brandBootScript`, `BRAND_STORAGE_KEY`, `brandStorageKey(tenantId?)` | `src/brand/brand.ts` | localStorage persistence and pre-paint script. |
 | `defaultBrand`, `fontOptions`, `bundledFontFamilies` | `src/brand/brand.ts` | Credigit defaults and curated font catalogue. |
 | `Logo` | `src/brand/Logo.tsx` | Variants horizontal / stacked / symbol / wordmark, tone auto / default / reverse; switches to tenant logos. |
 | `colors`, `fonts`, `sizes`, `surfaceThemes`, `Size`, `SurfaceTheme`, `Density`, `readBrandColor` | `src/theme/tokens.ts` | JS mirror of tokens for canvas / PDF / e-mail. |
@@ -43,7 +43,7 @@ Full prop signatures: [CONVENTIONS §5](../../CONVENTIONS.md).
 | Store | Key fields |
 |---|---|
 | `BrandConfig` (React context) | `name`, `colors { primary, accent, neutral }`, `logos { horizontal, horizontalReverse, stacked, stackedReverse, symbol, symbolReverse }`, `font { family, source }` |
-| localStorage `credigit.brand` (`BRAND_STORAGE_KEY`, overridable `storageKey`) | Serialised `BrandInput` |
+| localStorage `credigit.brand` (`BRAND_STORAGE_KEY`), `credigit.brand.<tenantId>` with `tenantId` (`brandStorageKey`), or explicit `storageKey` | Serialised `BrandInput` |
 | CSS custom properties on `<html>` | `--cg-*` brand scales, `--cg-font-family` |
 
 ## 5. Rule keys used
@@ -67,13 +67,14 @@ Not applicable (REQUIREMENTS §5–7). UI callbacks are the integration surface 
 
 ## 8. Tests
 
-Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for this doc change.
+Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`).
 
 | Test file | Covers |
 |---|---|
 | `src/brand/font.test.ts` | `BrandProvider`, `mergeBrand`, `isHexColor`, `loadStoredBrand`, `defaultBrand` |
 | `src/components/utilities/brand-settings-panel.test.tsx` | `BrandProvider` |
 | `src/brand/brand.test.ts` | `mergeBrand`, `isHexColor` |
+| `src/brand/brand-storage.test.tsx` | `brandStorageKey`, `BrandProvider tenantId` / `storageKey` precedence, tenant isolation |
 
 ## 9. Requirements traceability
 
@@ -88,15 +89,22 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 | BRD-FR-07 | `src/theme/tokens.ts` | — | Done (no test) |
 | BRD-FR-08 | `src/utils/cx.ts` | — | Done (no test) |
 | BRD-FR-09 | `src/styles/credigit.css` | — | Done (no test) |
+| BRD-FR-10 | `src/brand/BrandProvider.tsx`, `src/brand/brand.ts` | `brand-storage.test.tsx` | Done |
 
 ## 10. Gaps against the invariants
 
-- Brand persistence is browser localStorage only; per-tenant brand must be loaded by the app into `initialBrand` / `updateBrand` from tenant configuration — no tenant-aware storage key by default (cross-tenant bleed possible on shared browsers unless apps set `storageKey`).
-- Invariant 9 connector-ready: Google Fonts outbound call not recorded in `docs/integration-points.md` (file does not exist).
+- Brand persistence is browser localStorage only; the authoritative per-tenant brand must still be loaded by the app into `initialBrand` from tenant configuration. Apps must pass `tenantId` (closed TD-009) so stored brands do not bleed across tenants on shared browsers.
+- Invariant 9 connector-ready: Google Fonts outbound call recorded as WC-INT-01 in [integration-points.md](../../integration-points.md).
 - `Logo` and `tokens.ts` have no tests.
-- Invariant 8: no `TECH-DEBT.md` exists in this repo, so the literal defaults listed in §5 are not registered as exceptions with IDs.
+- Invariant 8: the literal defaults listed in §5 are registered as exceptions in [TECH-DEBT.md](../../../TECH-DEBT.md) (ids in §11 and next to each literal in the code).
 - Invariant 12: permission checks are out of scope for a library; apps must gate every action that these components render.
 
 ## 11. Tech debt
 
-No `TECH-DEBT.md` in this repo, so no TD ids exist. Items in §10 are candidates.
+Registered in [TECH-DEBT.md](../../../TECH-DEBT.md):
+
+| ID | Item | Status |
+|---|---|---|
+| TD-008 | Status colours (success / warning / danger / info) are provisional, not in the brand kit | Open |
+| TD-009 | Brand persistence key was not tenant-scoped (`credigit.brand` shared by every tenant on a browser) | Closed |
+| TD-019 | Components without dedicated tests: `Logo`, `tokens.ts`, `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `DocumentList`, `TenantSwitcher`, `ActivityFeed` / `AuditTrail`, `ChipInput`, `RoleMultiSelect`, `RuleCard` | Open |

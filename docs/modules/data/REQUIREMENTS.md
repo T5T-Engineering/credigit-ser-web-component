@@ -45,6 +45,7 @@ Not applicable (consumers enforce). The library holds no permission catalogue an
 | DAT-FR-06 | `MetricDelta` — Change indicator with intent / invert; arrow + hidden text. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | DAT-FR-07 | `EntityHeader` — Record page header with identifier copy, status, facts, actions, tabs. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | DAT-FR-08 | `ActivityFeed` — Day-grouped activity list; detailed audit mode with before / after changes, IP, device and immutable notice. | [CONVENTIONS §5](../../CONVENTIONS.md) |
+| DAT-FR-10 | `DataTable.onExport(rows, filename)` — called before the CSV download (filtered + sorted rows, all pages); returning `false` (or a promise resolving to `false`) cancels it. Lets the app check the export permission and write the audit entry. | Invariants 9 (audited) and 12 (exports are permissioned); data IMPLEMENTATION §10 gap |
 | DAT-FR-09 | `KanbanBoard` — Columns with WIP limits, drag & drop plus keyboard Move menu. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 
 ## 4. Business rules and parameters

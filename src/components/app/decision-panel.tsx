@@ -54,6 +54,7 @@ export type DecisionPanelProps = Omit<ComponentProps<"form">, "onSubmit" | "titl
 export function DecisionPanel({
   actions = ["approve", "recommend", "return", "decline"],
   onDecide,
+  // TD-004: strict default; the workflow step configuration should supply it.
   commentRequired = true,
   minCommentLength = 1,
   requireStepUp = false,

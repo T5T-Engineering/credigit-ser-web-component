@@ -19,5 +19,5 @@ Per-module requirements and implementation notes (project invariant 14). Modules
 ## Cross-cutting notes
 
 - Permissions, workflows, notifications, audit and domain events are not applicable inside a UI library; consuming apps enforce them (invariants 9 and 12).
-- This repo has no `TECH-DEBT.md` and no `docs/integration-points.md`; literal defaults and the Google Fonts call are listed as gaps in the module docs.
+- Literal defaults standing in for business rules are registered in [TECH-DEBT.md](../../TECH-DEBT.md) (TD ids referenced in the code); the Google Fonts call and brand storage are recorded in [integration-points.md](../integration-points.md).
 - README › Structure lists only seven groups (missing `data`, `app`, `operations`).
