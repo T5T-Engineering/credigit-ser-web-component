@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { WorkflowDiagram } from "./workflow-diagram";
 import { moveWorkflowStep, validateWorkflowStep, validateWorkflowSteps, WorkflowStepEditor, type WorkflowStep } from "./workflow-step-editor";
-import { formatSlaDuration, OperationTimeline, slaState, WorkflowInstanceCard, type OperationStep } from "./workflow-instance-card";
+import { formatSlaDuration, OperationTimeline, operationStatusMeta, slaState, WorkflowInstanceCard, type OperationStep } from "./workflow-instance-card";
 
 const roleOptions = [
   { value: "maker", label: "Relationship manager" },
@@ -185,5 +185,18 @@ describe("Operations instance", () => {
     render(<WorkflowInstanceCard subject={{ title: "X" }} status="rejected" steps={steps} showTimeline={false} now={now} />);
     expect(screen.getByTestId("operation-status")).toHaveTextContent("Rejected");
     expect(screen.queryByRole("timer")).not.toBeInTheDocument();
+  });
+
+  it("failed operations show a Failed status distinct from Rejected and hide the SLA", () => {
+    render(<WorkflowInstanceCard subject={{ title: "X" }} status="failed" steps={steps} showTimeline={false} now={now} />);
+    expect(screen.getByTestId("operation-status")).toHaveTextContent("Failed");
+    expect(screen.getByRole("article")).toHaveAttribute("data-status", "failed");
+    expect(screen.queryByRole("timer")).not.toBeInTheDocument();
+    expect(operationStatusMeta.failed).toMatchObject({ tone: "danger", label: "Failed" });
+  });
+
+  it("failed status label can be overridden", () => {
+    render(<WorkflowInstanceCard subject={{ title: "X" }} status="failed" statusLabels={{ failed: "Apply failed" }} now={now} />);
+    expect(screen.getByTestId("operation-status")).toHaveTextContent("Apply failed");
   });
 });

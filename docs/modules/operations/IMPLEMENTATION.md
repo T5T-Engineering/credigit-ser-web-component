@@ -38,7 +38,7 @@ React 19 function components, TypeScript strict, Tailwind 4 token utilities, luc
 | `RuleCard`, `RuleRow` | `src/components/operations/rule-card.tsx` | Rule display: key copy, value vs default, scope, pending approval, source, changed by. |
 | `WorkflowStepEditor`, `validateWorkflowStep`, `validateWorkflowSteps`, `moveWorkflowStep` | `src/components/operations/workflow-step-editor.tsx` | Ordered step editor: name, approver roles, any / all, SLA hours, condition, adjudicator, notify; reorder by keyboard / drag. |
 | `WorkflowDiagram` | `src/components/operations/workflow-diagram.tsx` | Visual workflow definition with current / completed steps and adjudicator branch. |
-| `WorkflowInstanceCard`, `OperationTimeline`, `SlaCountdown`, `slaState`, `formatSlaDuration`, `operationStatusMeta`, `operationDecisionMeta` | `src/components/operations/workflow-instance-card.tsx` | Running operation with status, requester, current step, SLA pill and timeline. |
+| `WorkflowInstanceCard`, `OperationTimeline`, `SlaCountdown`, `slaState`, `formatSlaDuration`, `operationStatusMeta`, `operationDecisionMeta` | `src/components/operations/workflow-instance-card.tsx` | Running operation with status, requester, current step, SLA pill and timeline. `OperationStatus` includes `failed` (danger tone, `CircleAlert` icon, label "Failed"; SLA hidden like other closed statuses). |
 | `HtmlTemplatePreview`, `withPreviewCsp`, `templatePreviewCsp` | `src/components/operations/html-template-preview.tsx` | Sandboxed iframe preview (`sandbox=""`, CSP meta, no scripts) with desktop / mobile toggle. |
 | `TemplateVariableList` | `src/components/operations/html-template-preview.tsx` | Template variables with copy / insert. |
 | `EventLogList`, `matchEventPattern`, `filterEvents`, `formatPayload` | `src/components/operations/event-log-list.tsx` | Domain-event log with name / module filters and wildcard patterns. |
@@ -78,7 +78,7 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`). Not run for th
 | Test file | Covers |
 |---|---|
 | `src/components/operations/rule-value-input.test.tsx` | `RuleValueInput` |
-| `src/components/operations/workflow.test.tsx` | `WorkflowStepEditor`, `WorkflowDiagram`, `WorkflowInstanceCard` |
+| `src/components/operations/workflow.test.tsx` | `WorkflowStepEditor`, `WorkflowDiagram`, `WorkflowInstanceCard` (incl. `failed` status and its label override) |
 | `src/components/operations/extensions.test.tsx` | `HtmlTemplatePreview`, `TemplateVariableList`, `EventLogList`, `SubscriptionList`, `KeyValueEditor` |
 
 ## 9. Requirements traceability

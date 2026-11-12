@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ComponentProps, type ElementType, type ReactNode } from "react";
-import { Ban, CircleCheck, CircleDot, CircleX, Clock, Hourglass, MessageSquare, SkipForward, ThumbsUp, Undo2 } from "lucide-react";
+import { Ban, CircleAlert, CircleCheck, CircleDot, CircleX, Clock, Hourglass, MessageSquare, SkipForward, ThumbsUp, Undo2 } from "lucide-react";
 
 import { Avatar } from "../basic/avatar";
 import { Badge } from "../basic/badge";
@@ -10,7 +10,7 @@ import { cx } from "../../utils/cx";
 import { labelText, toneText, toneTile } from "./ops-utils";
 
 /** Status of a running operation (workflow instance). */
-export type OperationStatus = "pending" | "in_progress" | "approved" | "rejected" | "returned" | "cancelled" | "expired";
+export type OperationStatus = "pending" | "in_progress" | "approved" | "rejected" | "returned" | "cancelled" | "expired" | "failed";
 
 /** Tone, label and icon per operation status. */
 export const operationStatusMeta: Record<OperationStatus, { tone: Tone; label: string; icon: typeof Clock }> = {
@@ -21,6 +21,8 @@ export const operationStatusMeta: Record<OperationStatus, { tone: Tone; label: s
   returned: { tone: "warning", label: "Returned", icon: Undo2 },
   cancelled: { tone: "neutral", label: "Cancelled", icon: Ban },
   expired: { tone: "danger", label: "Expired", icon: Hourglass },
+  /** Approved, but applying the change failed (e.g. the target system rejected it) — needs follow-up. */
+  failed: { tone: "danger", label: "Failed", icon: CircleAlert },
 };
 
 /** Decision recorded on a step. */

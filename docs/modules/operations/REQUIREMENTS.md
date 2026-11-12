@@ -42,7 +42,7 @@ Not applicable (consumers enforce). The library holds no permission catalogue an
 | OPS-FR-04 | `RuleCard` — Rule display: key copy, value vs default, scope, pending approval, source, changed by. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | OPS-FR-05 | `WorkflowStepEditor` — Ordered step editor: name, approver roles, any / all, SLA hours, condition, adjudicator, notify; reorder by keyboard / drag. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | OPS-FR-06 | `WorkflowDiagram` — Visual workflow definition with current / completed steps and adjudicator branch. | [CONVENTIONS §5](../../CONVENTIONS.md) |
-| OPS-FR-07 | `WorkflowInstanceCard` — Running operation with status, requester, current step, SLA pill and timeline. | [CONVENTIONS §5](../../CONVENTIONS.md) |
+| OPS-FR-07 | `WorkflowInstanceCard` — Running operation with status, requester, current step, SLA pill and timeline. Statuses: pending, in progress, approved, rejected, returned, cancelled, expired and **failed** (approved, but applying the change failed — distinct from rejected; frontend TD-960, Operations OPS-FR-17). | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | OPS-FR-08 | `HtmlTemplatePreview` — Sandboxed iframe preview (`sandbox=""`, CSP meta, no scripts) with desktop / mobile toggle. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | OPS-FR-09 | `TemplateVariableList` — Template variables with copy / insert. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | OPS-FR-10 | `EventLogList` — Domain-event log with name / module filters and wildcard patterns. | [CONVENTIONS §5](../../CONVENTIONS.md) |
