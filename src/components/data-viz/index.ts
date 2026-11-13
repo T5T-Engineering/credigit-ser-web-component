@@ -5,6 +5,7 @@ export * from "./donut-chart";
 export * from "./progress-bar";
 export * from "./gauge";
 export * from "./sparkline";
+export * from "./qr-code";
 export * from "./rag-indicator";
 export * from "./stacked-bar-chart";
 export * from "./area-chart";
