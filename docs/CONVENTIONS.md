@@ -84,6 +84,7 @@ All controls: controlled or uncontrolled, `size?: "small"|"medium"|"large"`, `in
 - `FileUpload` — drag & drop zone, `accept?`, `multiple?`, `maxSizeMb?`, `onFilesChange(files)`; lists selected files.
 - `Form` — `<form>` with vertical stack spacing; `FormActions` — right-aligned button row. Checks required fields on submit: every `Field required` inside whose control is empty shows "This field is required." (`validationLabels?.required`), the first one is scrolled to and focused, and `onSubmit` runs only when all are filled (`noValidate` by default so the message is ours, not the browser's).
 - `useValidation(labels?)` + `ValidationScope value={controller}` — the same check for areas saved by a button instead of a `<form>` submit: `if (!validation.validate()) return;` then save; `validation.reset()` after a successful save. `Field` props for it: `valueMissing?` (for custom controls the DOM check can't read — chip inputs, pickers) and `requiredMessage?`. Fields in a closed dialog, a `hidden` / `inert` / `aria-hidden` region never block. Helpers `isValueMissing(id)`, `isOutOfView(el)`.
+- `SubmitButton` — `Button` for save / submit actions: inside a scope (`ValidationScope`, `Form`, and every `Modal` / `Drawer`, which carry their own scope, fresh on each open) it runs the required-field check first and calls `onClick` only when all are filled; outside a scope it is a plain `Button`. Use it for every Save / Submit / Request button; keep `Button` for cancel, discard and navigation.
 - `PasswordInput` — `Input` with a show/hide toggle (`showLabel`, `hideLabel`); defaults `autoComplete="current-password"` (use `new-password` for sign-up/reset).
 - `PasswordStrength` — strength meter + rules checklist for a new password: `value`, `rules?: PasswordRule[]` (default `defaultPasswordRules`: 12+ chars, upper, lower, number, symbol — password policy is a tenant setting), `hideRules?`. Helper `evaluatePassword(value, rules)` → `{ valid, passed, failed, score 0–4 }`.
 
@@ -120,7 +121,7 @@ All controls: controlled or uncontrolled, `size?: "small"|"medium"|"large"`, `in
 - `Alert` — inline message: `tone?: "info" | "success" | "warning" | "danger"`, `title?`, children, `action?`.
 - `Blockquote` — `quote`, `author?`, `role?` (no fabricated testimonials in product copy).
 - `Accordion`, `AccordionItem` — `type?: "single" | "multiple"`, `defaultValue?`; item `value`, `title`, children. Uses native `<details>`/`<summary>` or full ARIA disclosure.
-- `Modal` — `open`, `onOpenChange`, `title`, `description?`, `footer?`, `size?: "small"|"medium"|"large"`. Native `<dialog>`, focus trap, Escape closes, restores focus.
+- `Modal` — `open`, `onOpenChange`, `title`, `description?`, `footer?`, `size?: "small"|"medium"|"large"`. Native `<dialog>`, focus trap, Escape closes, restores focus. Body and footer share a validation scope (reset on open), so a footer `SubmitButton` checks the body's required fields; `Drawer` does the same.
 - `Drawer` — like `Modal` but slides from `side?: "start" | "end"`.
 - `StatCard` — KPI tile: `label`, `value` (mono figure), `delta?: string`, `deltaDirection?: "up" | "down" | "flat"`, `deltaIntent?: "positive" | "negative" | "neutral"`, `hint?`, `icon?`, `tone?: Tone`.
 - `EmptyState` — `icon?`, `title`, `description?`, `action?`.

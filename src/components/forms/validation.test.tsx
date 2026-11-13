@@ -3,7 +3,8 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Button } from "../basic/button";
-import { Field, Form, Input, Select, Textarea, ValidationScope, useValidation } from "./index";
+import { Modal } from "../blocks/modal";
+import { Field, Form, Input, Select, SubmitButton, Textarea, ValidationScope, useValidation } from "./index";
 
 describe("Form required-field check", () => {
   it("blocks submit, shows the message on each empty required field and focuses the first", () => {
@@ -111,5 +112,31 @@ describe("useValidation / ValidationScope", () => {
   it("shows nothing before a save attempt", () => {
     render(<Page onSave={() => {}} />);
     expect(screen.queryByText("Fill this in.")).not.toBeInTheDocument();
+  });
+});
+
+describe("SubmitButton", () => {
+  it("checks the fields of the Modal body from the footer before saving", () => {
+    const onSave = vi.fn();
+    render(
+      <Modal open onOpenChange={() => {}} title="New loss event" footer={<SubmitButton onClick={onSave}>Save</SubmitButton>}>
+        <Field label="Description" required>
+          <Textarea />
+        </Field>
+      </Modal>,
+    );
+    act(() => screen.getByRole("button", { name: "Save" }).click());
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByText("This field is required.")).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: /description/i }), { target: { value: "ATM cash shortage" } });
+    act(() => screen.getByRole("button", { name: "Save" }).click());
+    expect(onSave).toHaveBeenCalledOnce();
+  });
+
+  it("acts as a plain button outside a scope", () => {
+    const onSave = vi.fn();
+    render(<SubmitButton onClick={onSave}>Save</SubmitButton>);
+    act(() => screen.getByRole("button", { name: "Save" }).click());
+    expect(onSave).toHaveBeenCalledOnce();
   });
 });

@@ -1,9 +1,10 @@
 "use client";
 
-import { useId, type ComponentProps, type ReactNode } from "react";
+import { useEffect, useId, type ComponentProps, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 import { cx } from "../../utils/cx";
+import { ValidationScope, useValidation } from "../forms/validation";
 import { focusRing } from "./block-utils";
 import { useDialog } from "./use-dialog";
 
@@ -69,51 +70,60 @@ export function Modal({
   const { dialogProps, requestClose } = useDialog(open, onOpenChange);
   const titleId = `${id}-title`;
   const descId = `${id}-desc`;
+  const validation = useDialogValidation(open);
 
   return (
-    <dialog
-      {...props}
-      {...dialogProps}
-      aria-labelledby={titleId}
-      aria-describedby={description ? descId : undefined}
-      aria-modal="true"
-      onMouseDown={(event) => {
-        onMouseDown?.(event);
-        if (closeOnBackdrop) dialogProps.onMouseDown(event);
-      }}
-      className={cx(
-        "m-auto w-[calc(100%-2rem)] max-h-[calc(100dvh-2rem)] overflow-visible bg-transparent p-0 text-fg",
-        "backdrop:bg-primary-900/60 backdrop:backdrop-blur-[2px]",
-        "opacity-100 transition-[opacity,translate,scale] duration-200 ease-bolt open:translate-y-0 open:scale-100 starting:open:translate-y-2 starting:open:scale-[0.98] starting:open:opacity-0",
-        sizeClass[size],
-        className,
-      )}
-    >
-      <div className="squircle flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden rounded-4xl bg-surface shadow-lg">
-        <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <h2 id={titleId} className="font-display text-[1.5rem] leading-[1.2] font-bold tracking-[-0.015em] text-balance text-fg">
-              {title}
-            </h2>
-            {description ? (
-              <p id={descId} className="text-base leading-6 text-fg-muted">
-                {description}
-              </p>
-            ) : null}
+    <ValidationScope value={validation}>
+      <dialog
+        {...props}
+        {...dialogProps}
+        aria-labelledby={titleId}
+        aria-describedby={description ? descId : undefined}
+        aria-modal="true"
+        onMouseDown={(event) => {
+          onMouseDown?.(event);
+          if (closeOnBackdrop) dialogProps.onMouseDown(event);
+        }}
+        className={cx(
+          "m-auto w-[calc(100%-2rem)] max-h-[calc(100dvh-2rem)] overflow-visible bg-transparent p-0 text-fg",
+          "backdrop:bg-primary-900/60 backdrop:backdrop-blur-[2px]",
+          "opacity-100 transition-[opacity,translate,scale] duration-200 ease-bolt open:translate-y-0 open:scale-100 starting:open:translate-y-2 starting:open:scale-[0.98] starting:open:opacity-0",
+          sizeClass[size],
+          className,
+        )}
+      >
+        <div className="squircle flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden rounded-4xl bg-surface shadow-lg">
+          <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <h2 id={titleId} className="font-display text-[1.5rem] leading-[1.2] font-bold tracking-[-0.015em] text-balance text-fg">
+                {title}
+              </h2>
+              {description ? (
+                <p id={descId} className="text-base leading-6 text-fg-muted">
+                  {description}
+                </p>
+              ) : null}
+            </div>
+            <DialogCloseButton label={closeLabel} onClick={requestClose} />
           </div>
-          <DialogCloseButton label={closeLabel} onClick={requestClose} />
+          {children ? (
+            <div data-dialog-body="" className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 text-base leading-6 text-fg-muted sm:px-8">
+              {children}
+            </div>
+          ) : null}
+          {footer ? <div className="flex flex-wrap items-center justify-end gap-3 px-6 pt-2 pb-6 sm:px-8 sm:pb-8">{footer}</div> : null}
         </div>
-        {children ? (
-          <div data-dialog-body="" className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 text-base leading-6 text-fg-muted sm:px-8">
-            {children}
-          </div>
-        ) : null}
-        {footer ? (
-          <div className="flex flex-wrap items-center justify-end gap-3 px-6 pt-2 pb-6 sm:px-8 sm:pb-8">
-            {footer}
-          </div>
-        ) : null}
-      </div>
-    </dialog>
+      </dialog>
+    </ValidationScope>
   );
+}
+
+/** Validation scope of a dialog (body and footer): a `SubmitButton` in the footer checks the required fields in the body. Fresh on every open. */
+export function useDialogValidation(open: boolean) {
+  const validation = useValidation();
+  const { reset } = validation;
+  useEffect(() => {
+    if (open) reset();
+  }, [open, reset]);
+  return validation;
 }

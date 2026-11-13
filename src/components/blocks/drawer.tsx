@@ -3,7 +3,8 @@
 import { useId, type ComponentProps, type ReactNode } from "react";
 
 import { cx } from "../../utils/cx";
-import { DialogCloseButton } from "./modal";
+import { ValidationScope } from "../forms/validation";
+import { DialogCloseButton, useDialogValidation } from "./modal";
 import { useDialog } from "./use-dialog";
 
 /** Props for `Drawer`. */
@@ -55,55 +56,50 @@ export function Drawer({
   const titleId = `${id}-title`;
   const descId = `${id}-desc`;
   const end = side === "end";
+  const validation = useDialogValidation(open);
 
   return (
-    <dialog
-      {...props}
-      {...dialogProps}
-      aria-labelledby={titleId}
-      aria-describedby={description ? descId : undefined}
-      aria-modal="true"
-      onMouseDown={(event) => {
-        onMouseDown?.(event);
-        if (closeOnBackdrop) dialogProps.onMouseDown(event);
-      }}
-      className={cx(
-        "fixed inset-y-0 m-0 h-dvh max-h-none w-full overflow-hidden bg-transparent p-2 text-fg sm:p-3",
-        end ? "start-auto end-0" : "start-0 end-auto",
-        "backdrop:bg-primary-900/60 backdrop:backdrop-blur-[2px]",
-        "translate-x-0 transition-transform duration-300 ease-bolt",
-        end ? "starting:open:translate-x-full" : "starting:open:-translate-x-full",
-        sizeClass[size],
-        className,
-      )}
-    >
-      <div
+    <ValidationScope value={validation}>
+      <dialog
+        {...props}
+        {...dialogProps}
+        aria-labelledby={titleId}
+        aria-describedby={description ? descId : undefined}
+        aria-modal="true"
+        onMouseDown={(event) => {
+          onMouseDown?.(event);
+          if (closeOnBackdrop) dialogProps.onMouseDown(event);
+        }}
         className={cx(
-          "squircle flex h-full flex-col overflow-hidden rounded-4xl bg-surface shadow-lg",
+          "fixed inset-y-0 m-0 h-dvh max-h-none w-full overflow-hidden bg-transparent p-2 text-fg sm:p-3",
+          end ? "start-auto end-0" : "start-0 end-auto",
+          "backdrop:bg-primary-900/60 backdrop:backdrop-blur-[2px]",
+          "translate-x-0 transition-transform duration-300 ease-bolt",
+          end ? "starting:open:translate-x-full" : "starting:open:-translate-x-full",
+          sizeClass[size],
+          className,
         )}
       >
-        <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
-          <div className="flex min-w-0 flex-col gap-1">
-            <h2 id={titleId} className="font-display text-[1.5rem] leading-[1.2] font-bold tracking-[-0.015em] text-balance text-fg">
-              {title}
-            </h2>
-            {description ? (
-              <p id={descId} className="text-base leading-6 text-fg-muted">
-                {description}
-              </p>
-            ) : null}
+        <div className={cx("squircle flex h-full flex-col overflow-hidden rounded-4xl bg-surface shadow-lg")}>
+          <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4 sm:px-8 sm:pt-8">
+            <div className="flex min-w-0 flex-col gap-1">
+              <h2 id={titleId} className="font-display text-[1.5rem] leading-[1.2] font-bold tracking-[-0.015em] text-balance text-fg">
+                {title}
+              </h2>
+              {description ? (
+                <p id={descId} className="text-base leading-6 text-fg-muted">
+                  {description}
+                </p>
+              ) : null}
+            </div>
+            <DialogCloseButton label={closeLabel} onClick={requestClose} />
           </div>
-          <DialogCloseButton label={closeLabel} onClick={requestClose} />
-        </div>
-        <div data-dialog-body="" className="min-h-0 flex-1 overflow-y-auto px-6 py-4 text-base leading-6 text-fg-muted sm:px-8">
-          {children}
-        </div>
-        {footer ? (
-          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-line px-6 py-5 sm:px-8">
-            {footer}
+          <div data-dialog-body="" className="min-h-0 flex-1 overflow-y-auto px-6 py-4 text-base leading-6 text-fg-muted sm:px-8">
+            {children}
           </div>
-        ) : null}
-      </div>
-    </dialog>
+          {footer ? <div className="flex flex-wrap items-center justify-end gap-3 border-t border-line px-6 py-5 sm:px-8">{footer}</div> : null}
+        </div>
+      </dialog>
+    </ValidationScope>
   );
 }
