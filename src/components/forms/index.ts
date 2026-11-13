@@ -1,4 +1,4 @@
-export { FieldContext, useFieldContext, useFieldControl } from "./field-context";
+﻿export { FieldContext, useFieldContext, useFieldControl } from "./field-context";
 export type { FieldContextValue, FormControlSize } from "./field-context";
 export { Field } from "./field";
 export type { FieldProps } from "./field";
@@ -30,5 +30,5 @@ export { Form, FormActions } from "./form";
 export type { FormActionsProps, FormProps } from "./form";
 export * from "./password-input";
 export * from "./password-strength";
-export { ValidationScope, defaultValidationLabels, isOutOfView, isValueMissing, useValidation, useValidationContext } from "./validation";
+export { SubmitButton, ValidationScope, defaultValidationLabels, isOutOfView, isValueMissing, useValidation, useValidationContext } from "./validation";
 export type { ValidationContextValue, ValidationController, ValidationLabels, ValidationScopeProps } from "./validation";

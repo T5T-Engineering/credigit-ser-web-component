@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
+
+import { Button, type ButtonProps } from "../basic/button";
 
 /** Overridable copy of the required-field check. */
 export type ValidationLabels = {
@@ -29,10 +31,10 @@ export type ValidationContextValue = {
   register: (id: string, entry: Entry) => () => void;
 };
 
-const ValidationContext = createContext<ValidationContextValue | null>(null);
+const ValidationContext = createContext<ValidationController | null>(null);
 
 /** The surrounding validation scope (null outside one). */
-export function useValidationContext(): ValidationContextValue | null {
+export function useValidationContext(): ValidationController | null {
   return useContext(ValidationContext);
 }
 
@@ -90,6 +92,26 @@ export type ValidationScopeProps = {
 /** Makes the required `Field`s inside it report to the controller (no DOM of its own). */
 export function ValidationScope({ value, children }: ValidationScopeProps) {
   return <ValidationContext value={value}>{children}</ValidationContext>;
+}
+
+/**
+ * `Button` for save / submit actions inside a `ValidationScope` (a page scope, `Modal`, `Drawer` or `Form`): on click it
+ * checks the scope's required fields first and runs `onClick` only when all are filled. Outside a scope it is a plain `Button`.
+ */
+export function SubmitButton({ onClick, ...props }: ButtonProps) {
+  const scope = useValidationContext();
+  return (
+    <Button
+      {...props}
+      onClick={(event: MouseEvent<HTMLButtonElement>) => {
+        if (scope && !scope.validate()) {
+          event.preventDefault();
+          return;
+        }
+        onClick?.(event);
+      }}
+    />
+  );
 }
 
 /** Controls in a closed dialog, a hidden panel or an inert region can't be filled in, so they never block a save. */
