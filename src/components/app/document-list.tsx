@@ -8,16 +8,21 @@ import { cx } from "../../utils/cx";
 import { chromeButton } from "./app-utils";
 
 /** Processing status of an uploaded document. */
-export type DocumentStatus = "uploaded" | "processing" | "extracted" | "verified" | "rejected";
+export type DocumentStatus = "uploaded" | "processing" | "extracted" | "pending" | "verified" | "rejected" | "quarantined";
 
 /** Tone and label per document status. */
 export const documentStatusMeta: Record<DocumentStatus, { tone: Tone; label: string }> = {
   uploaded: { tone: "neutral", label: "Uploaded" },
   processing: { tone: "info", label: "Processing OCR" },
   extracted: { tone: "accent", label: "Extracted" },
+  pending: { tone: "warning", label: "Awaiting review" },
   verified: { tone: "success", label: "Verified" },
   rejected: { tone: "danger", label: "Rejected" },
+  quarantined: { tone: "danger", label: "Quarantined" },
 };
+
+/** An extra marker shown before the status (e.g. "Legal hold", "Deletion pending"). */
+export type DocumentTag = { label: ReactNode; tone?: Tone };
 
 /** An uploaded document. */
 export type DocumentItem = {
@@ -37,6 +42,8 @@ export type DocumentItem = {
   note?: ReactNode;
   /** Category, e.g. "KYC", "Financials". */
   category?: ReactNode;
+  /** Extra markers shown as badges before the status. */
+  tags?: DocumentTag[];
 };
 
 /** Document action handlers (buttons render only for handlers provided). */
@@ -45,6 +52,8 @@ export type DocumentActions = {
   onDownload?: (doc: DocumentItem) => void;
   onReplace?: (doc: DocumentItem) => void;
   onDelete?: (doc: DocumentItem) => void;
+  /** Extra actions after the icon buttons (e.g. a "Review" button or a menu); return null for none. */
+  renderActions?: (doc: DocumentItem) => ReactNode;
 };
 
 function kindOf(doc: DocumentItem): "pdf" | "sheet" | "image" | "archive" | "doc" | "other" {
@@ -71,7 +80,7 @@ const kindTile = {
 export type FileCardProps = Omit<ComponentProps<"div">, "children"> & DocumentActions & { document: DocumentItem };
 
 /** One uploaded document: type icon, name, size, version, uploader, status and actions. */
-export function FileCard({ document: doc, onPreview, onDownload, onReplace, onDelete, className, ...props }: FileCardProps) {
+export function FileCard({ document: doc, onPreview, onDownload, onReplace, onDelete, renderActions, className, ...props }: FileCardProps) {
   const kind = kindOf(doc);
   const Icon = kindIcon[kind];
   const status = doc.status ? documentStatusMeta[doc.status] : undefined;
@@ -81,6 +90,7 @@ export function FileCard({ document: doc, onPreview, onDownload, onReplace, onDe
   if (onDownload) actions.push({ label: "Download", icon: <Download className="size-4" />, fn: onDownload });
   if (onReplace) actions.push({ label: "Replace", icon: <RefreshCw className="size-4" />, fn: onReplace });
   if (onDelete) actions.push({ label: "Delete", icon: <Trash2 className="size-4" />, fn: onDelete, danger: true });
+  const extra = renderActions?.(doc);
 
   return (
     <div className={cx("squircle flex flex-wrap items-center gap-x-4 gap-y-3 rounded-3xl bg-surface-sunken p-3.5 sm:flex-nowrap", className)} {...props}>
@@ -110,8 +120,13 @@ export function FileCard({ document: doc, onPreview, onDownload, onReplace, onDe
             </span>
           ) : null}
         </div>
-        {doc.note ? <p className={cx("text-xs", doc.status === "rejected" ? "text-danger-strong" : "text-fg-muted")}>{doc.note}</p> : null}
+        {doc.note ? <p className={cx("text-xs", doc.status === "rejected" || doc.status === "quarantined" ? "text-danger-strong" : "text-fg-muted")}>{doc.note}</p> : null}
       </div>
+      {doc.tags?.map((t, i) => (
+        <Badge key={i} tone={t.tone ?? "neutral"} className="shrink-0">
+          {t.label}
+        </Badge>
+      ))}
       {status ? (
         <Badge tone={status.tone} dot={doc.status !== "processing"} className="shrink-0">
           {doc.status === "processing" ? <LoaderCircle aria-hidden="true" className="size-3 animate-spin" /> : null}
@@ -134,6 +149,7 @@ export function FileCard({ document: doc, onPreview, onDownload, onReplace, onDe
           ))}
         </div>
       ) : null}
+      {extra ? <div className="flex shrink-0 flex-wrap items-center gap-2">{extra}</div> : null}
     </div>
   );
 }
@@ -147,13 +163,13 @@ export type DocumentListProps = Omit<ComponentProps<"ul">, "children"> &
   };
 
 /** List of uploaded documents rendered as `FileCard`s. */
-export function DocumentList({ documents, empty, onPreview, onDownload, onReplace, onDelete, className, ...props }: DocumentListProps) {
+export function DocumentList({ documents, empty, onPreview, onDownload, onReplace, onDelete, renderActions, className, ...props }: DocumentListProps) {
   if (documents.length === 0) return <>{empty ?? <p className="text-sm text-fg-muted">No documents uploaded yet.</p>}</>;
   return (
     <ul className={cx("flex flex-col gap-2", className)} {...props}>
       {documents.map((doc) => (
         <li key={doc.id}>
-          <FileCard document={doc} onPreview={onPreview} onDownload={onDownload} onReplace={onReplace} onDelete={onDelete} />
+          <FileCard document={doc} onPreview={onPreview} onDownload={onDownload} onReplace={onReplace} onDelete={onDelete} renderActions={renderActions} />
         </li>
       ))}
     </ul>
