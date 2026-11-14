@@ -54,7 +54,7 @@ React 19 function components, TypeScript strict, Tailwind 4 token utilities, luc
 | `StepUpAuthDialog`, `CodeInput` | `src/components/app/step-up-auth-dialog.tsx` | OTP / PIN re-authentication modal (UI only; `onVerify` is the app's). |
 | `CommentThread`, `splitMentions` | `src/components/app/comment-thread.tsx` | Comments with mentions, internal flag, compose box. |
 | `AiInsightCard`, `AiDraftPanel` | `src/components/app/ai-insight.tsx` | AI-drafted / flagged / insight labelling, model, time, confidence, sources, accept / edit / dismiss, sign-off note. |
-| `FileCard`, `DocumentList`, `documentStatusMeta` | `src/components/app/document-list.tsx` | Document rows with status (incl. OCR processing) and per-handler actions. |
+| `FileCard`, `DocumentList`, `documentStatusMeta`, `DocumentTag` | `src/components/app/document-list.tsx` | Document rows with status (incl. OCR processing, `pending` = awaiting review, `quarantined`), `tags` badges, per-handler actions and `renderActions(doc)` for extra app actions. |
 | `ChecklistPanel`, `checklistSummary`, `checklistStatusMeta` | `src/components/app/checklist-panel.tsx` | Conditions-precedent checklist with progress. |
 | `PhaseBadge`, `ModuleHeader` | `src/components/app/module-header.tsx` | Module page header with phase badge and pill sub-navigation. |
 | `SignInCard`, `MicrosoftSignInButton`, `MicrosoftLogo` | `src/components/app/sign-in-card.tsx` | Sign-in card with Microsoft button (Microsoft brand colours — documented exception, TD-005); `microsoft={false}` for local mode. |
@@ -127,7 +127,7 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`).
 | APP-FR-08 | `src/components/app/step-up-auth-dialog.tsx` | `step-up-auth-dialog.test.tsx` | Done |
 | APP-FR-09 | `src/components/app/comment-thread.tsx` | — | Done (no test) |
 | APP-FR-10 | `src/components/app/ai-insight.tsx` | — | Done (no test) |
-| APP-FR-11 | `src/components/app/document-list.tsx` | — | Done (no test) |
+| APP-FR-11 | `src/components/app/document-list.tsx` | `document-list.test.tsx` | Done |
 | APP-FR-12 | `src/components/app/checklist-panel.tsx` | `checklist-panel.test.tsx` | Done |
 | APP-FR-13 | `src/components/app/module-header.tsx` | — | Done (no test) |
 | APP-FR-14 | `src/components/app/sign-in-card.tsx` | `sign-in-card.test.tsx` | Done |
@@ -144,7 +144,7 @@ Vitest + Testing Library (`vitest.config.ts`, `vitest.setup.ts`).
 ## 10. Gaps against the invariants
 
 - Session (120 s) and OTP (30 s, 6 digits) defaults are literals; registered as TD-001 – TD-003. Apps pass the rule / backend values.
-- `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `DocumentList`, `TenantSwitcher` have no tests (TD-019).
+- `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `TenantSwitcher` have no tests (TD-019).
 - Permission-aware support: `Can` / `useCan` (app-supplied `has`), `PermissionGate`, `disabled` props; `DocumentList` actions and `UserMenu` items still rely on the app omitting handlers (TD-022).
 - Invariant 8: the literal defaults listed in §5 are registered as exceptions in [TECH-DEBT.md](../../../TECH-DEBT.md) (ids in §11 and next to each literal in the code).
 - Invariant 12: permission checks are out of scope for a library; apps must gate every action that these components render.
@@ -160,5 +160,5 @@ Registered in [TECH-DEBT.md](../../../TECH-DEBT.md):
 | TD-003 | One-time code length defaults to 6 (`StepUpAuthDialog.length`, `CodeInput.length`, `OtpVerification.length`) | Open |
 | TD-004 | `DecisionPanel.commentRequired` defaults to `true` (comment required for every decision) | Open |
 | TD-005 | Microsoft sign-in button uses Microsoft's own hex colours | Accepted |
-| TD-019 | Components without dedicated tests: `Logo`, `tokens.ts`, `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `DocumentList`, `TenantSwitcher`, `ActivityFeed` / `AuditTrail`, `ChipInput`, `RoleMultiSelect`, `RuleCard` | Open |
+| TD-019 | Components without dedicated tests: `Logo`, `tokens.ts`, `AppHeader`, `UserMenu`, `CommentThread`, `AiInsightCard`, `TenantSwitcher`, `ActivityFeed` / `AuditTrail`, `ChipInput`, `RoleMultiSelect`, `RuleCard` | Open |
 | TD-022 | `UserMenu` items and `DocumentList` actions are permission-aware only by the app omitting handlers | Open |

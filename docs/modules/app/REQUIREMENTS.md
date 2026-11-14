@@ -49,7 +49,7 @@ Permission-aware support that exists: `PermissionProvider` + `Can` / `useCan` (t
 | APP-FR-08 | `StepUpAuthDialog` — OTP / PIN re-authentication modal (UI only; `onVerify` is the app's). | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | APP-FR-09 | `CommentThread` — Comments with mentions, internal flag, compose box. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | APP-FR-10 | `AiInsightCard` — AI-drafted / flagged / insight labelling, model, time, confidence, sources, accept / edit / dismiss, sign-off note. | [CONVENTIONS §5](../../CONVENTIONS.md) |
-| APP-FR-11 | `FileCard` — Document rows with status (incl. OCR processing) and per-handler actions. | [CONVENTIONS §5](../../CONVENTIONS.md) |
+| APP-FR-11 | `FileCard` — Document rows with status (incl. OCR processing, awaiting review and quarantined), extra tags (e.g. legal hold, deletion pending), per-handler actions and app-supplied extra actions (`renderActions`) for the platform DMS (backend ADR-0021). | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | APP-FR-12 | `ChecklistPanel` — Conditions-precedent checklist with progress. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | APP-FR-13 | `PhaseBadge` — Module page header with phase badge and pill sub-navigation. | [CONVENTIONS §5](../../CONVENTIONS.md) |
 | APP-FR-14 | `SignInCard` — Sign-in card with Microsoft button (Microsoft brand colours — documented exception); `microsoft={false}` hides it for local e-mail + password mode (`/auth/config` `mode: "Local"`). | [CONVENTIONS §5](../../CONVENTIONS.md) |
