@@ -95,7 +95,7 @@ All controls: controlled or uncontrolled, `size?: "small"|"medium"|"large"`, `in
 - `Grid` — `columns?: 1|2|3|4|6|12` or responsive object `{ base?, sm?, md?, lg?, xl? }`, `gap?: Size`.
 - `Layout` — two-column content/aside: `aside: ReactNode`, `asidePosition?: "start" | "end"`, `asideWidth?: "narrow" | "medium" | "wide"`.
 - `Site` — page frame: `header?`, `footer?`, children main (`<main id="main">`), includes a "Skip to content" link.
-- `AppShell` — application frame for credigit-ser-frontend: `sidebar`, `topbar?`, children content; responsive (sidebar becomes a drawer below `lg`). Print: sidebar, overlay and top bar are `print:hidden` and the content column drops its sidebar offset, so printed documents (offer letters) are clean.
+- `AppShell` — application frame for credigit-ser-frontend: `sidebar` (node, or `({ collapsed }) => node`), `topbar?`, children content; responsive (sidebar becomes a drawer below `lg`). Collapsible rail: `sidebarCollapsed` + `onSidebarCollapsedChange` adds a collapse / expand button to the top bar on large screens (labels `collapseButtonLabel` / `expandButtonLabel`); the drawer below `lg` always shows the full sidebar (`collapsed` is false there). The app keeps the preference. Print: sidebar, overlay and top bar are `print:hidden` and the content column drops its sidebar offset, so printed documents (offer letters) are clean.
 - `Divider` — `orientation?`, `label?`.
 
 ### navigation (`src/components/navigation`)
