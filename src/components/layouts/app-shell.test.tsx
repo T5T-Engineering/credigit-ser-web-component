@@ -20,3 +20,33 @@ describe("AppShell print", () => {
     expect(container.querySelector(".bg-overlay")?.className).toContain("print:hidden");
   });
 });
+
+describe("AppShell collapsible sidebar", () => {
+  it("toggles the rail and tells the sidebar whether it is collapsed", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const changes: boolean[] = [];
+    const { rerender } = render(
+      <AppShell sidebar={({ collapsed }) => <nav aria-label="Side">{collapsed ? "Rail" : "Full"}</nav>} sidebarCollapsed={false} onSidebarCollapsedChange={(c) => changes.push(c)}>
+        <p>Body</p>
+      </AppShell>,
+    );
+    expect(screen.getByText("Full")).toBeInTheDocument();
+    expect(screen.getByRole("main").parentElement?.className).toContain("lg:pl-64");
+    await userEvent.click(screen.getByRole("button", { name: "Collapse navigation" }));
+    expect(changes).toEqual([true]);
+
+    rerender(
+      <AppShell sidebar={({ collapsed }) => <nav aria-label="Side">{collapsed ? "Rail" : "Full"}</nav>} sidebarCollapsed onSidebarCollapsedChange={(c) => changes.push(c)}>
+        <p>Body</p>
+      </AppShell>,
+    );
+    expect(screen.getByText("Rail")).toBeInTheDocument();
+    expect(screen.getByRole("main").parentElement?.className).toContain("lg:pl-16");
+    expect(screen.getByRole("button", { name: "Expand navigation" })).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("shows no collapse button without a handler", () => {
+    render(<AppShell sidebar={<nav aria-label="Side">Nav</nav>}>x</AppShell>);
+    expect(screen.queryByRole("button", { name: "Collapse navigation" })).toBeNull();
+  });
+});

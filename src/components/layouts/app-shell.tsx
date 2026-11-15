@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu as MenuIcon, X } from "lucide-react";
+import { Menu as MenuIcon, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState, type ComponentProps, type MouseEvent, type ReactNode } from "react";
 
 import { cx } from "../../utils/cx";
@@ -22,12 +22,21 @@ function useIsDesktop(): boolean {
 
 /** Props for {@link AppShell}. */
 export type AppShellProps = ComponentProps<"div"> & {
-  /** Sidebar content, typically `<SideNav />`. */
-  sidebar: ReactNode;
+  /**
+   * Sidebar content, typically `<SideNav />`. A function receives whether the rail is collapsed right now (collapsed on large
+   * screens only — the mobile drawer always shows the full sidebar), e.g. `({ collapsed }) => <SideNav collapsed={collapsed} />`.
+   */
+  sidebar: ReactNode | ((state: { collapsed: boolean }) => ReactNode);
   /** Top bar content (search, user menu …). The mobile menu button is added automatically. */
   topbar?: ReactNode;
-  /** Narrow sidebar (pair with `<SideNav collapsed />`). */
+  /** Narrow sidebar (pair with `<SideNav collapsed />`, or pass `sidebar` as a function). */
   sidebarCollapsed?: boolean;
+  /** Shows a collapse / expand button in the top bar on large screens; called with the new state. */
+  onSidebarCollapsedChange?: (collapsed: boolean) => void;
+  /** Label of the collapse button. Default "Collapse navigation". */
+  collapseButtonLabel?: string;
+  /** Label of the expand button. Default "Expand navigation". */
+  expandButtonLabel?: string;
   /** Accessible name of the mobile drawer. Default "Navigation". */
   sidebarLabel?: string;
   /** Label of the mobile menu button. Default "Open navigation". */
@@ -44,6 +53,9 @@ export function AppShell({
   sidebar,
   topbar,
   sidebarCollapsed = false,
+  onSidebarCollapsedChange,
+  collapseButtonLabel = "Collapse navigation",
+  expandButtonLabel = "Expand navigation",
   sidebarLabel = "Navigation",
   menuButtonLabel = "Open navigation",
   mainId = "main",
@@ -57,6 +69,7 @@ export function AppShell({
   const drawerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const drawerOpen = open && !desktop;
+  const railCollapsed = sidebarCollapsed && desktop;
 
   const close = useCallback((restoreFocus = true) => {
     setOpen(false);
@@ -110,7 +123,7 @@ export function AppShell({
         onClick={onDrawerClick}
         className={cx(
           "fixed inset-y-0 left-0 z-50 transition-transform duration-200 ease-bolt lg:translate-x-0 print:hidden",
-          sidebarCollapsed ? "w-64 lg:w-16" : "w-64",
+          railCollapsed ? "w-64 lg:w-16" : "w-64",
           drawerOpen ? "translate-x-0 shadow-lg" : "-translate-x-full",
         )}
       >
@@ -124,10 +137,10 @@ export function AppShell({
             <X aria-hidden="true" className="size-5" />
           </button>
         ) : null}
-        <div className="h-full">{sidebar}</div>
+        <div className="h-full">{typeof sidebar === "function" ? sidebar({ collapsed: railCollapsed }) : sidebar}</div>
       </div>
 
-      <div className={cx("flex min-h-screen flex-col print:block print:min-h-0 print:pl-0!", sidebarCollapsed ? "lg:pl-16" : "lg:pl-64")}>
+      <div className={cx("flex min-h-screen flex-col print:block print:min-h-0 print:pl-0!", railCollapsed ? "lg:pl-16" : "lg:pl-64")}>
         <header className="sticky top-0 z-30 print:hidden flex h-16 items-center gap-3 border-b border-line/60 bg-surface/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
           <button
             ref={buttonRef}
@@ -140,6 +153,18 @@ export function AppShell({
           >
             <MenuIcon aria-hidden="true" className="size-5" />
           </button>
+          {onSidebarCollapsedChange ? (
+            <button
+              type="button"
+              onClick={() => onSidebarCollapsedChange(!sidebarCollapsed)}
+              aria-label={sidebarCollapsed ? expandButtonLabel : collapseButtonLabel}
+              aria-expanded={!sidebarCollapsed}
+              title={sidebarCollapsed ? expandButtonLabel : collapseButtonLabel}
+              className="-ml-1 hidden size-10 place-items-center rounded-full text-fg transition-colors hover:bg-fg/5 active:bg-fg/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus lg:grid"
+            >
+              {sidebarCollapsed ? <PanelLeftOpen aria-hidden="true" className="size-5" /> : <PanelLeftClose aria-hidden="true" className="size-5" />}
+            </button>
+          ) : null}
           <div className="flex min-w-0 flex-1 items-center gap-3">{topbar}</div>
         </header>
         <main id={mainId} tabIndex={-1} className="min-w-0 flex-1 focus:outline-none print:m-0 print:p-0">
