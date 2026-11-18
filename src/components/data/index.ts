@@ -7,3 +7,4 @@ export * from "./metric-delta";
 export * from "./entity-header";
 export * from "./activity-feed";
 export * from "./kanban-board";
+export * from "./json-explorer";
