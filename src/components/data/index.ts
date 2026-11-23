@@ -8,3 +8,4 @@ export * from "./entity-header";
 export * from "./activity-feed";
 export * from "./kanban-board";
 export * from "./json-explorer";
+export * from "./image-gallery";
